@@ -1,6 +1,7 @@
 package com.hk.transformation.core.context;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,12 +16,17 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Modified :
  * @Version : 1.0
  */
-public class TransformContext implements Transformable{
+public class TransformContext<T> implements Transformable{
 
     /**
      * 存储由@DynamicValue 注解标字段Field，及其注解属性key的值
      */
     private final Map<String, List<Field>> transformableFieldMap = new ConcurrentHashMap<>();
+
+    /**
+     *  存储由@DynamicValue 注解标注方法Method，及其注解属性key的值
+     */
+    private final Map<String, List<Method>> transformableMethodMap = new ConcurrentHashMap<>();
 
 
     @Override

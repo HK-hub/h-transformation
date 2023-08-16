@@ -6,10 +6,9 @@ import java.lang.annotation.*;
 
 /**
  * @author : HK意境
- * @ClassName : DynamicValue
- * @date : 2023/7/30 23:11
- * @description : 动态值注解。当标注在Type 类上的时候，表明其类下所有非Bean的对象类的Field字段属性都会被作为动态值进行解析，
- *                  如果不希望某个字段被解析成为动态值可以使用 {@link IgnoreValue} 注解进行修饰该字段进行忽略
+ * @ClassName : DynamicSwitch
+ * @date : 2023/8/16 16:16
+ * @description :
  * @Todo :
  * @Bug :
  * @Modified :
@@ -18,30 +17,25 @@ import java.lang.annotation.*;
 @Target({ElementType.FIELD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface DynamicValue {
-
-    /**
-     * 等同于key: 如果为空默认，如果是属性字段=全类名.属性名，如果是方法=全类名#方法名
-     */
-    String value() default "";
+public @interface DynamicSwitch {
 
     /**
      * 动态值的Key, 用于后期获取和修改进行定位
      */
-    @AliasFor()
+    @AliasFor("value")
     String key() default "";
 
 
     /**
      * 默认值,初始值
      */
-    String defaultValue() default "";
+    boolean defaultValue();
 
 
     /**
      * 动态值的Class类型
      */
-    Class<?> valueClass() default void.class;
+    Class<?> valueClass() default boolean.class;
 
 
     /**
