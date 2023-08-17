@@ -11,4 +11,14 @@ package com.hk.transformation.core.member;
  * @Version : 1.0
  */
 public interface IMember {
+
+    /**
+     * 更新值
+     * @param newValue 需要更新的新值
+     * @return 返回就值
+     */
+    public Object update(Object newValue);
+
+
+
 }

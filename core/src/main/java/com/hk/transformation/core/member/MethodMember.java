@@ -11,4 +11,10 @@ package com.hk.transformation.core.member;
  * @Version : 1.0
  */
 public class MethodMember extends AbstractMember{
+
+
+    @Override
+    public Object update(Object newValue) {
+        return null;
+    }
 }

@@ -11,4 +11,8 @@ package com.hk.transformation.core.member;
  * @Version : 1.0
  */
 public abstract class AbstractMember implements IMember{
+
+
+
+
 }
