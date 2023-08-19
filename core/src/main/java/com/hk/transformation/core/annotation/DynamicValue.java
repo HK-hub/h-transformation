@@ -3,6 +3,9 @@ package com.hk.transformation.core.annotation;
 import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
+import java.lang.reflect.Member;
+import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @author : HK意境

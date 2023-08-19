@@ -14,6 +14,6 @@ import org.springframework.stereotype.Component;
  * @Version : 1.0
  */
 @Component
-@DynamicValue()
+@DynamicValue(defaultValue = "{1,2,4,5}", key = "test")
 public class TestBean {
 }

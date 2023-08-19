@@ -4,6 +4,7 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.hk.transformation.core.context.TransformContext;
+import com.hk.transformation.core.helper.DynamicValueHelper;
 import com.hk.transformation.core.value.TransformableValue;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.BeanFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -78,12 +80,19 @@ public class TransformValueRegistry {
         Member member = value.getMember();
 
         // 执行对于的初始化逻辑
-        if (member instanceof Field) {
+        try {
+            if (member instanceof Field field) {
 
-            // 字段类型
+                // 字段类型
+                DynamicValueHelper.assignField(field, value.getAnnotation().defaultValue(), value.getAnnotation().valueClass());
+            } else if (member instanceof Method) {
+                // 方法类型
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
 
         }
-
     }
 
 

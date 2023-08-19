@@ -28,4 +28,17 @@ public class DynamicValueHelper {
     }
 
 
+    /**
+     * 给字段赋值
+     * @param field 字段
+     * @param value 值
+     * @param clazz 值类型
+     */
+    public static void assignField(Field field, String value, Class<?> clazz) {
+
+        Class<?> type = field.getType();
+
+
+    }
+
 }

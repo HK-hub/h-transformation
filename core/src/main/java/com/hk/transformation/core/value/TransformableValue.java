@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 @Data
 @ToString
-public class TransformableValue implements InitializingBean {
+public class TransformableValue implements InitializingBean, Transformable{
 
     /**
      * 值key
@@ -89,7 +89,7 @@ public class TransformableValue implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
 
         // 获取注解属性值
-        String defaultValue = this.annotation.defaultValue();
+        Object defaultValue = this.annotation.defaultValue();
         Class<?> valueClass = this.annotation.valueClass();
 
         if (this.member instanceof Field field) {
@@ -110,7 +110,7 @@ public class TransformableValue implements InitializingBean {
      * @param defaultValue
      * @param valueClass
      */
-    private void initialize(Field field, String defaultValue, Class<?> valueClass) {
+    private void initialize(Field field, Object defaultValue, Class<?> valueClass) {
 
         // 是否已经初始化了
         if (BooleanUtils.isTrue(this.initialized.get())) {
@@ -137,9 +137,20 @@ public class TransformableValue implements InitializingBean {
      * @param valueClass
      * @return
      */
-    private boolean ensureTheValueAssignable(String defaultValue, Class<?> valueClass) {
+    private boolean ensureTheValueAssignable(Object defaultValue, Class<?> valueClass) {
+
+        if (this.member instanceof Field field) {
+            Class<?> type = field.getType();
+
+        }
+
+
         return false;
     }
 
 
+    @Override
+    public Object update(Object value) {
+        return null;
+    }
 }
