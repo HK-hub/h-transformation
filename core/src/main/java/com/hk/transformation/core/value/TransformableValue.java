@@ -1,6 +1,7 @@
 package com.hk.transformation.core.value;
 
 import com.hk.transformation.core.annotation.DynamicValue;
+import com.hk.transformation.core.helper.DynamicValueHelper;
 import lombok.Data;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 @Data
 @ToString
-public class TransformableValue implements InitializingBean, Transformable{
+public class TransformableValue implements Transformable{
 
     /**
      * 值key
@@ -61,6 +62,12 @@ public class TransformableValue implements InitializingBean, Transformable{
 
 
     /**
+     * 字段或方法的类
+     */
+    protected Class<?> memberClass;
+
+
+    /**
      * 是否初始化
      */
     protected AtomicBoolean initialized = new AtomicBoolean(false);
@@ -86,8 +93,7 @@ public class TransformableValue implements InitializingBean, Transformable{
      * @throws Exception
      */
     @Override
-    public void afterPropertiesSet() throws Exception {
-
+    public Object init() {
         // 获取注解属性值
         Object defaultValue = this.annotation.defaultValue();
         Class<?> valueClass = this.annotation.valueClass();
@@ -101,6 +107,7 @@ public class TransformableValue implements InitializingBean, Transformable{
             log.warn("method currently not supported...");
         }
 
+        return defaultValue;
     }
 
 
@@ -121,8 +128,11 @@ public class TransformableValue implements InitializingBean, Transformable{
         boolean enableAssign = this.ensureTheValueAssignable(defaultValue, valueClass);
 
         try{
+
+            // 转换为需要的类型的值
+            Object adaptiveValue = DynamicValueHelper.computeAdaptiveDynamicValue(bean, field, defaultValue, valueClass);
             field.setAccessible(true);
-            // TODO 转换成为需要的值类型
+            // 转换成为需要的值类型
             field.set(this.bean, defaultValue);
         }catch(Exception e){
             // 初始化异常
@@ -153,4 +163,5 @@ public class TransformableValue implements InitializingBean, Transformable{
     public Object update(Object value) {
         return null;
     }
+
 }

@@ -1,4 +1,4 @@
-package com.hk.transformation.core.event.signal;
+package com.hk.transformation.core.listen.event;
 
 
 import lombok.Getter;

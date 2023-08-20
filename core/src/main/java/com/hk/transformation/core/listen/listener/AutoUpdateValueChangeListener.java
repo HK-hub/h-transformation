@@ -1,12 +1,16 @@
-package com.hk.transformation.core.event.listener;
+package com.hk.transformation.core.listen.listener;
 
-import com.hk.transformation.core.event.signal.ValueChangeEvent;
+import com.hk.transformation.core.listen.event.ValueChangeEvent;
 import com.hk.transformation.core.registry.TransformValueRegistry;
+import com.hk.transformation.core.value.TransformableValue;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
+
+import java.util.List;
 
 /**
  * @author : HK意境
@@ -18,6 +22,7 @@ import org.springframework.context.ApplicationListener;
  * @Modified :
  * @Version : 1.0
  */
+@Slf4j
 public class AutoUpdateValueChangeListener implements ValueChangeListener, ApplicationListener<ValueChangeEvent>, ApplicationContextAware {
 
     private TransformValueRegistry transformValueRegistry;
@@ -35,9 +40,21 @@ public class AutoUpdateValueChangeListener implements ValueChangeListener, Appli
     @Override
     public Object onChange(ValueChangeEvent event) {
 
+        // 解析事件内容
+        String key = event.getKey();
+        Object newValue = event.getValue();
+        // 获取需要变更的对象
+        List<TransformableValue> transformableValues = this.transformValueRegistry.get(beanFactory, key);
 
-
-
+        // 更新值，获取旧值，用作观察者的通知
+        for (TransformableValue transformableValue : transformableValues) {
+            try {
+                Object oldValue = transformableValue.update(newValue);
+            } catch (Exception e) {
+                log.warn("Error updating transformValue:{} with key:{}, value:{} failed", transformableValue, key, newValue);
+            }
+        }
+        // 观察者模式通知观察者值变更
 
         return null;
     }

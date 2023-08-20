@@ -37,8 +37,19 @@ public class DynamicValueHelper {
     public static void assignField(Field field, String value, Class<?> clazz) {
 
         Class<?> type = field.getType();
-
-
     }
 
+
+    /**
+     * 计算出能够赋值的适配的类，如果不能转换为适配的类，将抛出异常
+     * @param bean
+     * @param field
+     * @param defaultValue
+     * @param valueClass
+     * @return
+     */
+    public static Object computeAdaptiveDynamicValue(Object bean, Field field, Object defaultValue, Class<?> valueClass) {
+
+        return null;
+    }
 }

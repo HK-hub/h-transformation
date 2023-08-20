@@ -13,6 +13,8 @@ import org.springframework.beans.factory.BeanFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -67,6 +69,25 @@ public class TransformValueRegistry {
         if (this.initialized.compareAndSet(false, true)) {
             this.initialize(value);
         }
+    }
+
+
+    /**
+     * 获取值对象
+     * @param beanFactory
+     * @param key
+     * @return
+     */
+    public List<TransformableValue> get(BeanFactory beanFactory, String key) {
+
+        Map<BeanFactory, Multimap<String, TransformableValue>> registry = this.context.getRegistry();
+        Multimap<String, TransformableValue> valueMultimap = registry.get(beanFactory);
+
+        // 获取Key 下value 值对象集合
+        Collection<TransformableValue> transformableValues = valueMultimap.get(key);
+
+        // 这里是可以类型转换的，声明的时候使用的LinkedList
+        return (List<TransformableValue>) transformableValues;
     }
 
 

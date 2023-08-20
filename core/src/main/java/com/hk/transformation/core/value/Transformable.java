@@ -19,4 +19,11 @@ public interface Transformable {
      */
     public Object update(Object value);
 
+
+    /**
+     * 初始化或恢复默认值
+     * @return
+     */
+    public Object init();
+
 }

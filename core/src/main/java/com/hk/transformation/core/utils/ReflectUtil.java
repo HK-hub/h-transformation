@@ -3,6 +3,12 @@ package com.hk.transformation.core.utils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.Map;
+
 /**
  * @author : HK意境
  * @ClassName : ReflectUtil
@@ -18,12 +24,13 @@ public class ReflectUtil {
 
     /**
      * 判断是否可以赋值
+     * @param field 字段
      * @param value
      * @param fieldType
      * @param valueType
      * @return
      */
-    public static boolean isAssignable(Object value, Class<?> fieldType, Class<?> valueType) {
+    public static boolean isAssignable(Field field, Class<?> fieldType, Object value, Class<?> valueType) {
 
         // 如果是 void.class 不能赋值
         if (isVoidType(fieldType) || isVoidType(valueType)) {
@@ -80,23 +87,54 @@ public class ReflectUtil {
                 // 如果值类型也是数组对象，其实可以直接判断两个成员类型是否可以赋值
                 return fieldComponentType.isAssignableFrom(valueComponentType);
             } else {
+
                 // valueType 值类型不是数组，但是可能为单个元素值，也可能为String
                 // 判断valueType 和 fieldComponentType 的关系。
+                if (fieldComponentType.isAssignableFrom(valueType)) {
+                    // 单个元素可以赋值
+                    return true;
+                }
 
-                // isAssignable()
+                // 不是能够直接赋值的，需要判断是否可以转换
+                if (isBaseType(fieldComponentType) && isBaseType(valueType)) {
+                    return true;
+                }
+
+                return false;
+            }
+        } else if (isCollectionType(fieldType)) {
+
+            // 判断valueType 类型
+            Class<?> genericType = getGenericType(field);
+            if (isCollectionType(valueType)) {
+                // 是否可以赋值或进行转换
+                return true;
+            } else if (isStringType(valueType)) {
+                // 字符串类型
+                return true;
+            } else if (isArrayType(valueType)){
+                // 非集合，非字符串，尝试是否数组类型
+
+                // 获取集合元素类型
+                Class<?> componentType = valueType.getComponentType();
+                if (genericType.isAssignableFrom(componentType)) {
+
+                    // 能够直接赋值
+                    return true;
+                } else if (isBaseType(genericType) && isBaseType(componentType)){
+
+                    // 不能直接赋值，是否可以通过转换
+                    return true;
+                } else if (isStringType(componentType)) {
+                    return true;
+                }
             }
 
-
+            return false;
+        } else {
+            // 是否对象类型
+            return isStringType(valueType);
         }
-
-
-
-
-        // 是否对象类型
-
-
-        // 是否集合类型
-
 
         return false;
     }
@@ -121,6 +159,27 @@ public class ReflectUtil {
 
         return targetClazz.isArray();
     }
+
+
+    /**
+     * 是否集合类型
+     * @param targetClazz
+     * @return
+     */
+    public static boolean isCollectionType(Class<?> targetClazz) {
+        return Collection.class.isAssignableFrom(targetClazz);
+    }
+
+
+    /**
+     * 是否是Map 类型
+     * @param targetClazz
+     * @return
+     */
+    public static boolean isMapType(Class<?> targetClazz) {
+        return Map.class.isAssignableFrom(targetClazz);
+    }
+
     /**
      * 判断是否数值类型
      * @param targetClazz java.lang.reflect.Field 的数据类型 clazz。 getType 方法获取
@@ -208,6 +267,39 @@ public class ReflectUtil {
     }
 
 
+    /**
+     * 获取泛型的类型
+     * @param field
+     * @return
+     */
+    public static Class<?> getGenericType(Field field) {
 
+        Type listFieldType = field.getGenericType();
+        if (listFieldType instanceof ParameterizedType) {
+            Type[] actualTypeArguments = ((ParameterizedType) listFieldType).getActualTypeArguments();
+            if (actualTypeArguments.length > 0) {
+                // 显示指定了泛型类型
+                Type genericType = actualTypeArguments[0];
+                return getTypeClass(genericType);
+            } else {
+                // 没有指定泛型类型，返回 Object
+                return Object.class;
+            }
+        } else {
+            // 没有指定泛型
+            return field.getDeclaringClass();
+        }
+    }
+
+
+    public static Class<?> getTypeClass(Type type) {
+        if (type instanceof Class) {
+            return (Class<?>) type;
+        } else if (type instanceof ParameterizedType) {
+            return (Class<?>) ((ParameterizedType) type).getRawType();
+        } else {
+            throw new IllegalArgumentException("Unsupported Type: " + type);
+        }
+    }
 
 }
