@@ -13,7 +13,10 @@ package com.hk.transformation.core.constants;
 public class TransformationConstants {
 
 
-
+    /**
+     * 字段Key定位符
+     */
+    public static final String FIELD_LOCATION_SEPARATOR = ".";
 
 
 }

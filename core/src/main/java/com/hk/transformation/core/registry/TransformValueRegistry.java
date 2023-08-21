@@ -112,7 +112,6 @@ public class TransformValueRegistry {
             }
         } catch (Exception e) {
             e.printStackTrace();
-
         }
     }
 

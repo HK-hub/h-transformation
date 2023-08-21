@@ -1,6 +1,7 @@
 package com.hk.transformation.core.listen.listener;
 
 import com.hk.transformation.core.listen.event.ValueChangeEvent;
+import com.hk.transformation.core.listen.singal.ValueChangeData;
 
 /**
  * @author : HK意境
@@ -17,9 +18,9 @@ public interface ValueChangeListener {
 
     /**
      * 值发生改变事件
-     * @param event {@link ValueChangeEvent}
+     * @param data {@link ValueChangeData}
      * @return object 返回旧值
      */
-    public Object onChange(ValueChangeEvent event);
+    public Object onChange(ValueChangeData data);
 
 }

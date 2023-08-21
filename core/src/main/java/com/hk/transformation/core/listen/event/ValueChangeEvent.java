@@ -1,6 +1,7 @@
 package com.hk.transformation.core.listen.event;
 
 
+import com.hk.transformation.core.listen.singal.ValueChangeData;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,18 +19,15 @@ import lombok.Setter;
 @Setter
 public class ValueChangeEvent extends TransformValueChangeEvent {
 
-    /**
-     * 变更的key
-     */
-    private String key;
-
-    /**
-     * 变更后的值
-     */
-    private Object value;
+    private ValueChangeData data;
 
 
-    public ValueChangeEvent(Object source) {
+    public ValueChangeEvent(ValueChangeData data, Object source) {
         super(source);
+        this.data = data;
     }
+
+
+
+
 }

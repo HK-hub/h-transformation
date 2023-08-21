@@ -126,6 +126,10 @@ public class TransformableValue implements Transformable{
 
         // 判断是否可以赋值的类型
         boolean enableAssign = this.ensureTheValueAssignable(defaultValue, valueClass);
+        if (BooleanUtils.isFalse(enableAssign)) {
+            // 不能进行赋值
+            return;
+        }
 
         try{
 
@@ -133,7 +137,10 @@ public class TransformableValue implements Transformable{
             Object adaptiveValue = DynamicValueHelper.computeAdaptiveDynamicValue(bean, field, defaultValue, valueClass);
             field.setAccessible(true);
             // 转换成为需要的值类型
-            field.set(this.bean, defaultValue);
+            field.set(this.bean, adaptiveValue);
+
+            // 设置为以及初始化
+            this.initialized.set(true);
         }catch(Exception e){
             // 初始化异常
             log.warn("try to assign:{} value to field:{} of Object:{}, but failed on:{}", defaultValue, field.getName(), bean.getClass(), e.getMessage());

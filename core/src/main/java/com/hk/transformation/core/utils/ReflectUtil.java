@@ -302,4 +302,15 @@ public class ReflectUtil {
         }
     }
 
+
+    /**
+     * 将Value转换为适合的String：基本类型直接of(), 数组类型转换为[e1,e2,e3,e4], 集合类型转换为{1,2,3,4},对象类型转换为JSON对象，Map 类型转换为{key:value,key:value,key:value}
+     * @param value
+     * @return
+     */
+    public static String valueToAdaptiveString(Object value) {
+
+
+        return "";
+    }
 }

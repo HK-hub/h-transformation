@@ -3,9 +3,6 @@ package com.hk.transformation.core.annotation;
 import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
-import java.lang.reflect.Member;
-import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * @author : HK意境
@@ -26,6 +23,7 @@ public @interface DynamicValue {
     /**
      * 等同于key: 如果为空默认，如果是属性字段=全类名.属性名，如果是方法=全类名#方法名
      */
+    @AliasFor("key")
     String value() default "";
 
     /**

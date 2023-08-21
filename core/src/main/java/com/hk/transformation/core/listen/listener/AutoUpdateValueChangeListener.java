@@ -1,6 +1,7 @@
 package com.hk.transformation.core.listen.listener;
 
 import com.hk.transformation.core.listen.event.ValueChangeEvent;
+import com.hk.transformation.core.listen.singal.ValueChangeData;
 import com.hk.transformation.core.registry.TransformValueRegistry;
 import com.hk.transformation.core.value.TransformableValue;
 import lombok.extern.slf4j.Slf4j;
@@ -38,11 +39,11 @@ public class AutoUpdateValueChangeListener implements ValueChangeListener, Appli
 
 
     @Override
-    public Object onChange(ValueChangeEvent event) {
+    public Object onChange(ValueChangeData data) {
 
         // 解析事件内容
-        String key = event.getKey();
-        Object newValue = event.getValue();
+        String key = data.getKey();
+        Object newValue = data.getValue();
         // 获取需要变更的对象
         List<TransformableValue> transformableValues = this.transformValueRegistry.get(beanFactory, key);
 
@@ -66,10 +67,11 @@ public class AutoUpdateValueChangeListener implements ValueChangeListener, Appli
         this.transformValueRegistry = this.applicationContext.getBean(TransformValueRegistry.class);
     }
 
+
     @Override
     public void onApplicationEvent(ValueChangeEvent event) {
 
         // 处理变更事件
-        this.onChange(event);
+        this.onChange(event.getData());
     }
 }
