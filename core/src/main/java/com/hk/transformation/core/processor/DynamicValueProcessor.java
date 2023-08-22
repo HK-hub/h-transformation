@@ -3,6 +3,7 @@ package com.hk.transformation.core.processor;
 import com.hk.transformation.core.annotation.DynamicValue;
 import com.hk.transformation.core.helper.DynamicValueHelper;
 import com.hk.transformation.core.registry.TransformValueRegistry;
+import com.hk.transformation.core.value.DynamicValueBean;
 import com.hk.transformation.core.value.TransformableValue;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 /**
  * @author : HK意境
@@ -60,7 +62,14 @@ public class DynamicValueProcessor extends TransformationProcessor implements Be
     protected void processField(Object bean, String beanName, Field field) {
 
         // 将注解计算出来
-        DynamicValue dynamicValue = DynamicValueHelper.computeDynamicFieldAnnotation(bean, field);
+        DynamicValueBean dynamicValue = DynamicValueHelper.computeDynamicFieldAnnotation(bean, field);
+
+        // 是否能够计算出来注解对象
+        if (Objects.isNull(dynamicValue)) {
+            // 不能成功得出，无法注册进入
+            log.warn("object:{}, field:{}, failed to build dynamicValueBean, can not to register to context", bean, field);
+            return;
+        }
 
         // 注册到Context中
         this.doRegister(bean, beanName, field, dynamicValue);
@@ -73,7 +82,7 @@ public class DynamicValueProcessor extends TransformationProcessor implements Be
      * @param member
      * @param dynamicValue
      */
-    private void doRegister(Object bean, String beanName, Member member, DynamicValue dynamicValue) {
+    private void doRegister(Object bean, String beanName, Member member, DynamicValueBean dynamicValue) {
 
         // 包装为TransformableValue 对象
         TransformableValue value = null;

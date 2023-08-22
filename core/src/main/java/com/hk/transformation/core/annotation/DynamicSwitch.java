@@ -29,7 +29,7 @@ public @interface DynamicSwitch {
     /**
      * 默认值,初始值
      */
-    boolean defaultValue();
+    boolean defaultValue() default false;
 
 
     /**

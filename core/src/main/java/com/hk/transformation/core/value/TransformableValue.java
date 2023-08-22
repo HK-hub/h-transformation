@@ -37,7 +37,7 @@ public class TransformableValue implements Transformable{
     /**
      * 注解
      */
-    protected DynamicValue annotation;
+    protected DynamicValueBean dynamicValueBean;
 
     /**
      * bean 对象
@@ -73,15 +73,15 @@ public class TransformableValue implements Transformable{
     protected AtomicBoolean initialized = new AtomicBoolean(false);
 
 
-    public TransformableValue(DynamicValue annotation, Object bean, Field field, boolean initialized) {
-        this.annotation = annotation;
+    public TransformableValue(DynamicValueBean dynamicValueBean, Object bean, Field field, boolean initialized) {
+        this.dynamicValueBean = dynamicValueBean;
         this.bean = bean;
         this.member = field;
         this.initialized.set(initialized);
     }
 
-    public TransformableValue(DynamicValue annotation, Object bean, Method method, boolean initialized) {
-        this.annotation = annotation;
+    public TransformableValue(DynamicValueBean dynamicValueBean, Object bean, Method method, boolean initialized) {
+        this.dynamicValueBean = dynamicValueBean;
         this.bean = bean;
         this.member = method;
         this.initialized.set(initialized);
@@ -95,8 +95,8 @@ public class TransformableValue implements Transformable{
     @Override
     public Object init() {
         // 获取注解属性值
-        Object defaultValue = this.annotation.defaultValue();
-        Class<?> valueClass = this.annotation.valueClass();
+        Object defaultValue = this.dynamicValueBean.getDefaultValue();
+        Class<?> valueClass = this.dynamicValueBean.getValueClass();
 
         if (this.member instanceof Field field) {
 
