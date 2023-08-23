@@ -1,6 +1,6 @@
 package com.hk.transformation.core.bean;
 
-import com.hk.transformation.core.annotation.DynamicValue;
+import com.hk.transformation.core.annotation.dynamic.DynamicValue;
 import org.springframework.stereotype.Component;
 
 /**

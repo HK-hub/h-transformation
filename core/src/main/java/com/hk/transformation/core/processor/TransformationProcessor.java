@@ -1,7 +1,7 @@
 package com.hk.transformation.core.processor;
 
-import com.hk.transformation.core.annotation.DynamicValue;
-import com.hk.transformation.core.annotation.IgnoreValue;
+import com.hk.transformation.core.annotation.dynamic.DynamicValue;
+import com.hk.transformation.core.annotation.dynamic.IgnoreValue;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.PriorityOrdered;

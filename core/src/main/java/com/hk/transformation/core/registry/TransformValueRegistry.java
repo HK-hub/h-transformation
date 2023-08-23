@@ -105,7 +105,7 @@ public class TransformValueRegistry {
             if (member instanceof Field field) {
 
                 // 字段类型
-                DynamicValueHelper.assignField(field, value.getAnnotation().defaultValue(), value.getAnnotation().valueClass());
+                DynamicValueHelper.assignField(field, value.getDynamicValueBean().getValue(), value.getDynamicValueBean().getValueClass());
             } else if (member instanceof Method) {
                 // 方法类型
 

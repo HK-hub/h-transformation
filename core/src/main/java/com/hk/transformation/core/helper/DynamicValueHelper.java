@@ -1,16 +1,31 @@
 package com.hk.transformation.core.helper;
 
-import com.hk.transformation.core.annotation.DynamicSwitch;
-import com.hk.transformation.core.annotation.DynamicValue;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
+import com.google.common.reflect.Reflection;
+import com.hk.transformation.core.annotation.dynamic.DynamicSwitch;
+import com.hk.transformation.core.annotation.dynamic.DynamicValue;
 import com.hk.transformation.core.constants.TransformationConstants;
-import com.hk.transformation.core.utils.ReflectUtil;
+import com.hk.transformation.core.reflect.converter.CollectionConverter;
+import com.hk.transformation.core.reflect.converter.StringToNumberConverter;
+import com.hk.transformation.core.reflect.util.ReflectUtil;
 import com.hk.transformation.core.value.DynamicValueBean;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.CharUtils;
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author : HK意境
@@ -22,6 +37,7 @@ import java.util.Objects;
  * @Modified :
  * @Version : 1.0
  */
+@Slf4j
 public class DynamicValueHelper {
 
     /**
@@ -81,7 +97,7 @@ public class DynamicValueHelper {
             }
 
             // 构造DynamicValueBean 对象
-            dynamicValueBean.setKey(key).setValue(value).setValueClass(valueClass);
+            dynamicValueBean.setKey(key).setValue(value).setDefaultValue(value).setValueClass(valueClass);
             return dynamicValueBean;
         }
 
@@ -129,7 +145,9 @@ public class DynamicValueHelper {
             }
 
             // 构造DynamicValueBean 对象
-            dynamicValueBean.setKey(key).setValue(Boolean.valueOf(value).toString())
+            String initValue = Boolean.valueOf(value).toString();
+            dynamicValueBean.setKey(key).setValue(initValue)
+                    .setDefaultValue(initValue)
                     .setValueClass(valueClass);
 
             return dynamicValueBean;
@@ -156,7 +174,9 @@ public class DynamicValueHelper {
                 initValueClass = initValue.getClass();
 
                 // 设置
-                dynamicValueBean.setDefaultValue(initValue.toString()).setValueClass(initValueClass);
+                dynamicValueBean.setValue(initValue.toString())
+                        .setDefaultValue(initValue.toString())
+                        .setValueClass(initValueClass);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -187,16 +207,77 @@ public class DynamicValueHelper {
     /**
      * 计算出能够赋值的适配的类，如果不能转换为适配的类，将抛出异常
      * @param bean
-     * @param field
-     * @param defaultValue
+     * @param field 字段属性声明类型
+     * @param value 原始数值
      * @param valueClass
      * @return
      */
-    public static Object computeAdaptiveDynamicValue(Object bean, Field field, Object defaultValue, Class<?> valueClass) {
+    public static Object computeAdaptiveDynamicValue(Object bean, Field field, Object value, Class<?> valueClass) {
 
         // 判断是否可以分配
+        boolean assignable = ReflectUtil.isAssignable(field, field.getType(), value, valueClass);
+        if (BooleanUtils.isFalse(assignable)) {
+             // 不能赋值
+            log.error("field:{}-class:{} can not assigned by value:{}-class{}", field, field.getClass(), value, valueClass);
+            throw new ClassCastException("field:" + field + "-class:"+ field.getClass() + ", can not assigned by value:"+ value + "-class:" + valueClass);
+        }
 
+        Class<?> fieldType = field.getType();
+        // // 判断 valueClass 是否可以直接分配给 fieldClass
+        if (ClassUtils.isAssignable(valueClass, fieldType)) {
+            // 可以直接分配，返回值
+            return value;
+        }
 
+        // 是否基本类型
+        if (ReflectUtil.isBaseType(fieldType)) {
+            // 基本类型：number，void, boolean, char, string
+            if (ReflectUtil.isNumberType(fieldType)) {
+                // 如果valueClass 也是number类型那么在前面 ClassUtils.isAssignable() 则会判断成功已经返回了
+                // 此时value 可能为Number中非基本类型及其包装类，或者为String类
+                if (valueClass.isPrimitive()) {
+                    // 如果是基本类型需要转换为包装类型
+                    valueClass = ClassUtils.wrapperToPrimitive(valueClass);
+                }
+
+                // 判断是否是数值类型
+                if (ReflectUtil.isNumberType(valueClass)) {
+                    return NumberUtils.createNumber(value.toString());
+                } else if (ReflectUtil.isStringType(valueClass)) {
+                    // 如果是String 直接尝试转换为Number
+                    return NumberUtils.createNumber(value.toString());
+                }
+
+                // 如果既不是基本数值类型也不是其包装类型，也不是字符串那么无法转换，抛出异常
+                throw new ClassCastException("value:" + value + ", class is " + valueClass + ", can not convert to field class:" + fieldType);
+            } else if (ReflectUtil.isBooleanType(fieldType)) {
+                // boolean 类型: 直接判断是否可以转为Boolean
+                return BooleanUtils.toBooleanObject(value.toString());
+            } else if (ReflectUtil.isCharType(fieldType)) {
+                // char 类型，尝试直接转换为一个char
+                if (ReflectUtil.isCharType(valueClass)) {
+                    // 无需转换直接返回
+                    return value;
+                }
+                // 转换成为char
+                return CharUtils.toCharacterObject(value.toString());
+            } else if (ReflectUtil.isStringType(valueClass)) {
+                return String.valueOf(value);
+            }
+        } else if (ReflectUtil.isCollectionType(fieldType)) {
+            // 是否集合类型
+            Class<?> genericType = ReflectUtil.getGenericType(field);
+            // 如果是集合类型可以判断value 是否集合，还是componentClass ,还是String 类型来进行单独值转换
+            if (ReflectUtil.isCollectionType(valueClass)) {
+                return CollectionConverter.convertCollection(fieldType, (Collection) value, genericType);
+            } else if (genericType.isAssignableFrom(valueClass)) {
+
+            }
+        }
+        // 是数组类型
+        //
+        // 是否Map 类型
+        // 是否对象类型
 
 
         return null;

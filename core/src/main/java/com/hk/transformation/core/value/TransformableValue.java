@@ -1,13 +1,12 @@
 package com.hk.transformation.core.value;
 
-import com.hk.transformation.core.annotation.DynamicValue;
 import com.hk.transformation.core.helper.DynamicValueHelper;
+import com.hk.transformation.core.reflect.util.ReflectUtil;
 import lombok.Data;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.InitializingBean;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -33,6 +32,10 @@ public class TransformableValue implements Transformable{
      */
     protected String key;
 
+    /**
+     * 当前值
+     */
+    protected Object value;
 
     /**
      * 注解
@@ -62,7 +65,7 @@ public class TransformableValue implements Transformable{
 
 
     /**
-     * 字段或方法的类
+     * 字段或方法的类: Field类或 Method 类
      */
     protected Class<?> memberClass;
 
@@ -75,6 +78,8 @@ public class TransformableValue implements Transformable{
 
     public TransformableValue(DynamicValueBean dynamicValueBean, Object bean, Field field, boolean initialized) {
         this.dynamicValueBean = dynamicValueBean;
+        this.key = dynamicValueBean.getKey();
+        this.value = dynamicValueBean.getDefaultValue();
         this.bean = bean;
         this.member = field;
         this.initialized.set(initialized);
@@ -82,6 +87,8 @@ public class TransformableValue implements Transformable{
 
     public TransformableValue(DynamicValueBean dynamicValueBean, Object bean, Method method, boolean initialized) {
         this.dynamicValueBean = dynamicValueBean;
+        this.key = dynamicValueBean.getKey();
+        this.value = dynamicValueBean.getDefaultValue();
         this.bean = bean;
         this.member = method;
         this.initialized.set(initialized);
@@ -94,6 +101,10 @@ public class TransformableValue implements Transformable{
      */
     @Override
     public Object init() {
+
+        // 设置member的Class 类型
+        this.memberClass = this.member.getClass();
+
         // 获取注解属性值
         Object defaultValue = this.dynamicValueBean.getDefaultValue();
         Class<?> valueClass = this.dynamicValueBean.getValueClass();
@@ -103,6 +114,7 @@ public class TransformableValue implements Transformable{
             // 字段初始化: 赋初值，计算表达式
             this.initialize(field, defaultValue, valueClass);
         } else if (this.member instanceof Method) {
+
             // 方法初始化
             log.warn("method currently not supported...");
         }
@@ -125,15 +137,14 @@ public class TransformableValue implements Transformable{
         }
 
         // 判断是否可以赋值的类型
-        boolean enableAssign = this.ensureTheValueAssignable(defaultValue, valueClass);
+        boolean enableAssign = ReflectUtil.isAssignable(field, field.getType(), defaultValue, valueClass);
         if (BooleanUtils.isFalse(enableAssign)) {
             // 不能进行赋值
             return;
         }
 
         try{
-
-            // 转换为需要的类型的值
+            // 可以赋值并不代表能够赋值成功，还需要转换为需要的类型的值
             Object adaptiveValue = DynamicValueHelper.computeAdaptiveDynamicValue(bean, field, defaultValue, valueClass);
             field.setAccessible(true);
             // 转换成为需要的值类型
@@ -145,24 +156,6 @@ public class TransformableValue implements Transformable{
             // 初始化异常
             log.warn("try to assign:{} value to field:{} of Object:{}, but failed on:{}", defaultValue, field.getName(), bean.getClass(), e.getMessage());
         }
-    }
-
-
-    /**
-     * 判断该值是否可以赋值
-     * @param defaultValue
-     * @param valueClass
-     * @return
-     */
-    private boolean ensureTheValueAssignable(Object defaultValue, Class<?> valueClass) {
-
-        if (this.member instanceof Field field) {
-            Class<?> type = field.getType();
-
-        }
-
-
-        return false;
     }
 
 

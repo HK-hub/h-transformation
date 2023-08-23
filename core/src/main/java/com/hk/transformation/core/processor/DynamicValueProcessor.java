@@ -1,6 +1,5 @@
 package com.hk.transformation.core.processor;
 
-import com.hk.transformation.core.annotation.DynamicValue;
 import com.hk.transformation.core.helper.DynamicValueHelper;
 import com.hk.transformation.core.registry.TransformValueRegistry;
 import com.hk.transformation.core.value.DynamicValueBean;

@@ -1,4 +1,4 @@
-package com.hk.transformation.core.utils;
+package com.hk.transformation.core.reflect.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -26,7 +26,7 @@ public class ReflectUtil {
      * 判断是否可以赋值
      * @param field 字段
      * @param value
-     * @param fieldType
+     * @param fieldType 字段属性声明类型
      * @param valueType
      * @return
      */

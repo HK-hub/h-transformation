@@ -1,4 +1,4 @@
-package com.hk.transformation.core.annotation;
+package com.hk.transformation.core.annotation.dynamic;
 
 import org.springframework.core.annotation.AliasFor;
 
