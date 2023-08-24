@@ -1,31 +1,22 @@
 package com.hk.transformation.core.helper;
 
-import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
-import com.google.common.reflect.Reflection;
+import com.google.gson.Gson;
 import com.hk.transformation.core.annotation.dynamic.DynamicSwitch;
 import com.hk.transformation.core.annotation.dynamic.DynamicValue;
 import com.hk.transformation.core.constants.TransformationConstants;
 import com.hk.transformation.core.reflect.converter.CollectionConverter;
-import com.hk.transformation.core.reflect.converter.StringToNumberConverter;
+import com.hk.transformation.core.reflect.converter.StringConverter;
 import com.hk.transformation.core.reflect.util.ReflectUtil;
 import com.hk.transformation.core.value.DynamicValueBean;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.CharUtils;
-import org.apache.commons.lang3.ClassUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.*;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.util.ReflectionUtils;
-
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.lang.reflect.Type;
+import java.util.*;
 
 /**
  * @author : HK意境
@@ -264,22 +255,94 @@ public class DynamicValueHelper {
             } else if (ReflectUtil.isStringType(valueClass)) {
                 return String.valueOf(value);
             }
-        } else if (ReflectUtil.isCollectionType(fieldType)) {
-            // 是否集合类型
+        }
+        // 是否集合类型
+        else if (ReflectUtil.isCollectionType(fieldType)) {
             Class<?> genericType = ReflectUtil.getGenericType(field);
             // 如果是集合类型可以判断value 是否集合，还是componentClass ,还是String 类型来进行单独值转换
             if (ReflectUtil.isCollectionType(valueClass)) {
                 return CollectionConverter.convertCollection(fieldType, (Collection) value, genericType);
             } else if (genericType.isAssignableFrom(valueClass)) {
-
+                // 如果不是集合，判断泛型类型是否可以被value类型赋值
+                return value;
+            } else if (ReflectUtil.isPrimitiveOrWrapperType(valueClass)) {
+                // 如果是基本数据类型
+                return genericType.cast(value);
+            } else if (ReflectUtil.isStringType(valueClass)) {
+                // String 类型的需要将其转换为[], 或者{} 格式
+                String[] valueArray = StringConverter.convertStringToArray(String.valueOf(value));
+                // 还需要判断元素能不能转换为genericType
+                Gson gson = new Gson();
+                ArrayList<Object> res = Lists.newArrayList();
+                for (String v : valueArray) {
+                    res.add(gson.fromJson(v, genericType));
+                }
+                return res;
+            } else {
+                throw new ClassCastException("value:" + value + ", class is " + valueClass + ", can not convert to field class:" + fieldType);
             }
         }
         // 是数组类型
-        //
+        else if (ReflectUtil.isArrayType(fieldType)) {
+
+            // 获取componentType
+            Class<?> componentType = fieldType.getComponentType();
+            // 如果value 也是Array类型
+            if (ReflectUtil.isArrayType(valueClass)) {
+                Class<?> valueComponentType = valueClass.getComponentType();
+                if (ClassUtils.isAssignable(valueComponentType, componentType)) {
+                    // 可以直接赋值
+                    return value;
+                } else {
+                    // 类型不能直接赋值，是否可以通过转换
+                    Gson gson = new Gson();
+                    gson.fromJson(String.valueOf(value), fieldType);
+                }
+            } else if (ReflectUtil.isPrimitiveOrWrapperType(valueClass)) {
+                if (ClassUtils.isAssignable(valueClass, componentType)) {
+                    return value;
+                }
+                throw new ClassCastException("value:" + value + ", class is " + valueClass + ", can not convert to field class:" + fieldType);
+            } else if (ReflectUtil.isStringType(valueClass)) {
+
+                // 转换为数组分割
+                String[] vArray = StringConverter.convertStringToArray((String) value);
+
+                // 创建ComponentType 类型数组
+                Gson gson = new Gson();
+                Object componentArray = Array.newInstance(componentType, vArray.length);
+
+                // 添加转换后的元素
+                for (int i = 0; i < vArray.length; i++) {
+
+                    // 转换元素为指定类型
+                    Object o = gson.fromJson(vArray[i], componentType);
+                    // 如果可以成功转换，设置，没有抛出异常则说明能够构造出适应的数据结构
+                    Array.set(componentArray, i, o);
+                }
+
+                // 没有抛出异常
+                return componentArray;
+            } else if (ReflectUtil.isCollectionType(valueClass)) {
+                // 集合类型: 直接判断是否可以转换
+                Type valueGenericType = ReflectUtil.getGenericType(valueClass);
+                if (ClassUtils.isAssignable((Class<?>) valueGenericType, fieldType)) {
+                    return ((Collection) value).toArray();
+                }
+            }
+        }
         // 是否Map 类型
+        else if (ReflectUtil.isMapType(fieldType)) {
+
+        }
         // 是否对象类型
+        else {
+            Gson gson = new Gson();
+            return gson.fromJson((String) value, fieldType);
+        }
 
 
-        return null;
+        // 战时没有匹配的类型
+        throw new ClassCastException("value:" + value + ", class is " + valueClass + ", can not convert to field class:" + fieldType);
     }
 }

@@ -1,5 +1,6 @@
 package com.hk.transformation.core.reflect.util;
 
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -149,6 +150,16 @@ public class ReflectUtil {
         return isNumberType(targetClazz) || isCharType(targetClazz) || isBooleanType(targetClazz) || isStringType(targetClazz);
     }
 
+    /**
+     * 是否基本类型及其包装类，不包括String
+     * @param targetClazz
+     * @return
+     */
+    public static boolean isPrimitiveOrWrapperType(Class<?> targetClazz) {
+
+        return isNumberType(targetClazz) || isCharType(targetClazz) || isBooleanType(targetClazz);
+    }
+
 
     /**
      * 是否数组类型
@@ -289,6 +300,24 @@ public class ReflectUtil {
             // 没有指定泛型
             return field.getDeclaringClass();
         }
+    }
+
+
+    /**
+     * 获取一个类声明的泛型参数
+     * @param clazz
+     * @return
+     */
+    public static Type getGenericType(Class<?> clazz) {
+        Type type = clazz.getGenericSuperclass();
+        if (type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            Type[] typeArguments = parameterizedType.getActualTypeArguments();
+            if (typeArguments.length > 0) {
+                return typeArguments[0];
+            }
+        }
+        return Object.class;
     }
 
 

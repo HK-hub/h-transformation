@@ -5,7 +5,7 @@ import java.math.BigInteger;
 
 
 /**
- * @ClassName : StringToNumberConverter
+ * @ClassName : NumberConverter
  * @author : HK意境
  * @date : 2023/8/23 17:09
  * @description :
@@ -14,7 +14,7 @@ import java.math.BigInteger;
  * @Modified :
  * @Version : 1.0
  */
-public class StringToNumberConverter {
+public class NumberConverter {
     public static boolean canConvertToInteger(String str) {
         try {
             Integer.parseInt(str);
