@@ -1,8 +1,12 @@
 package com.hk.transformation.core.annotation.observation;
 
+import org.springframework.stereotype.Component;
+
+import java.lang.annotation.*;
+
 /**
  * @author : HK意境
- * @ClassName : DynamicValueObserver
+ * @ClassName : DynamicObserver
  * @date : 2023/8/23 8:37
  * @description :
  * @Todo :
@@ -10,7 +14,11 @@ package com.hk.transformation.core.annotation.observation;
  * @Modified :
  * @Version : 1.0
  */
-public @interface DynamicValueObserver {
+@Component
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Documented
+public @interface DynamicObserver {
 
     /**
      * 需要监听变化的Key对应的动态值对象，可以传入多个key，同时监听多个

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ import java.util.List;
  * @Version : 1.0
  */
 @Slf4j
+@Component
 public class AutoUpdateValueChangeListener implements ValueChangeListener, ApplicationListener<ValueChangeEvent>, ApplicationContextAware {
 
     private TransformValueRegistry transformValueRegistry;
