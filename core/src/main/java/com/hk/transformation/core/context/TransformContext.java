@@ -1,8 +1,6 @@
 package com.hk.transformation.core.context;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
+import com.google.common.collect.*;
 import com.hk.transformation.core.listen.observation.observer.ValueObserver;
 import com.hk.transformation.core.value.TransformableValue;
 import lombok.Getter;
@@ -33,11 +31,6 @@ public class TransformContext implements Transformable{
     @Getter
     private final Map<BeanFactory, Multimap<String, TransformableValue>> registry = Maps.newConcurrentMap();
 
-    /**
-     * 观察者列表
-     */
-    @Getter
-    private final Multimap<String, ValueObserver> observerMap = Multimaps.newMultimap();
 
     /**
      * 存储由@DynamicValue 注解标字段Field，及其注解属性key的值

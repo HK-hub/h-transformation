@@ -2,16 +2,12 @@ package com.hk.transformation.core.processor;
 
 
 import com.hk.transformation.core.annotation.observation.DynamicObserver;
-import com.hk.transformation.core.context.TransformContext;
+import com.hk.transformation.core.context.ObservationContext;
 import com.hk.transformation.core.listen.observation.observer.ValueObserver;
-import com.hk.transformation.core.registry.TransformValueRegistry;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.util.LinkedMultiValueMap;
-
-import javax.annotation.Resource;
-import java.util.LinkedList;
 import java.util.Objects;
 
 /**
@@ -26,7 +22,7 @@ import java.util.Objects;
  */
 public class DynamicValueObserverProcessor implements BeanPostProcessor {
 
-    private TransformContext context = TransformContext.getInstance();
+    private ObservationContext context = ObservationContext.getInstance();
 
 
     /**
@@ -45,18 +41,18 @@ public class DynamicValueObserverProcessor implements BeanPostProcessor {
             return bean;
         }
 
-        // 注解不为空，注册到观察者列表中
-        LinkedMultiValueMap<String, ValueObserver> observerMap = context.getObserverMap();
-        String[] keys = annotation.key();
-        for (String key : keys) {
-            if (!observerMap.containsKey(key)) {
-                observerMap.put(key, new LinkedList<>());
+        // 需要确定Bean对象是否实现了 ValueObserver 接口
+        if (bean instanceof ValueObserver observerBean) {
+            String[] keys = annotation.key();
+
+            // 注解不为空，注册到观察者列表中
+            if (ArrayUtils.isNotEmpty(keys)) {
+                for (String key : keys) {
+                    context.add(key, observerBean);
+                }
             }
-            observerMap.put
         }
 
-
-
-
+        return bean;
     }
 }

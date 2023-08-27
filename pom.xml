@@ -10,6 +10,9 @@
     <version>1.0.0</version>
     <modules>
         <module>core</module>
+        <module>facade</module>
+        <module>service</module>
+        <module>web</module>
     </modules>
 
     <properties>

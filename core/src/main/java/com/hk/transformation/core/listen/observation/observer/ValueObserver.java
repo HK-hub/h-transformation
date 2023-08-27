@@ -1,6 +1,5 @@
 package com.hk.transformation.core.listen.observation.observer;
 
-import com.hk.transformation.core.value.TransformableValue;
 
 /**
  * @author : HK意境
@@ -16,9 +15,9 @@ public interface ValueObserver {
 
     /**
      * 观察者更新方法
-     * @param value
+     * @param oldValue
+     * @param newValue
      */
-    public void update(TransformableValue value);
-
+    public void update(Object oldValue, Object newValue);
 
 }

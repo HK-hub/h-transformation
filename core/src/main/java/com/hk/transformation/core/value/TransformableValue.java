@@ -159,6 +159,11 @@ public class TransformableValue implements Transformable{
     }
 
 
+    /**
+     * 更新值
+     * @param value
+     * @return
+     */
     @Override
     public Object update(Object value) {
         return null;
