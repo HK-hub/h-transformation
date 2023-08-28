@@ -13,6 +13,7 @@
         <module>facade</module>
         <module>service</module>
         <module>web</module>
+        <module>domain</module>
     </modules>
 
     <properties>
@@ -53,5 +54,15 @@
             <version>2.10.1</version>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-web</artifactId>
+                <version>${spring.boot.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 </project>
