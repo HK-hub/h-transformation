@@ -20,8 +20,15 @@ import java.util.List;
 public class DynamicValueFacadeImpl implements DynamicValueFacade {
 
 
+
+
+
     @Override
     public List<DynamicDataDomain> getAllDynamicValues() {
+
+
+
+
         return null;
     }
 

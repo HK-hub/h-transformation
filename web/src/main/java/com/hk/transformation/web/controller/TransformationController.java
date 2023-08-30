@@ -1,11 +1,10 @@
 package com.hk.transformation.web.controller;
 
+import com.hk.transformation.domain.request.UpdateTransformableValueDomain;
 import com.hk.transformation.domain.response.ResponseResult;
 import com.hk.transformation.service.api.DynamicValueService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -28,24 +27,56 @@ public class TransformationController {
     private DynamicValueService dynamicValueService;
 
 
-
+    /**
+     * 获取全部动态值对象数据
+     * @return
+     */
+    @GetMapping("/all")
     public ResponseResult getAllDynamicValues() {
         return dynamicValueService.getAllDynamicValues();
     }
 
+
+    /**
+     * 获取指定Key 下动态值数据
+     * @param key
+     * @return
+     */
+    @GetMapping("/key")
     public ResponseResult getDynamicValuesByKey(@RequestParam String key) {
         return this.dynamicValueService.getDynamicValuesByKey(key);
     }
 
-    public ResponseResult updateTransformableValue(String key, Object data) {
-        return this.dynamicValueService.updateTransformableValue(key, data);
+
+    /**
+     * 更新动态值
+     * @param request
+     * @return
+     */
+    @PostMapping("/update")
+    public ResponseResult updateTransformableValue(@RequestBody UpdateTransformableValueDomain request) {
+        return this.dynamicValueService.updateTransformableValue(request);
     }
 
-    public ResponseResult reset(@RequestParam String key) {
+
+    /**
+     * 重置key 下对应的动态值
+     * @param key
+     * @return
+     */
+    @PostMapping("/reset")
+    public ResponseResult reset(String key) {
         return this.dynamicValueService.reset(key);
     }
 
-    public ResponseResult remove(@RequestParam String key) {
+
+    /**
+     * 移除动态值对象
+     * @param key
+     * @return
+     */
+    @PostMapping("/remove")
+    public ResponseResult remove(String key) {
         return this.dynamicValueService.remove(key);
     }
 

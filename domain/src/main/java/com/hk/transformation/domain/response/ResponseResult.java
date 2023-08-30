@@ -42,6 +42,8 @@ public class ResponseResult<T> {
     private String message;
     // 返回数据
     private T data;
+    // 异常对象
+    private Exception exception;
     // 响应时间
     private LocalDateTime dateTime = LocalDateTime.now();
 

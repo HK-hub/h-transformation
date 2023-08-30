@@ -1,5 +1,6 @@
 package com.hk.transformation.service.api;
 
+import com.hk.transformation.domain.request.UpdateTransformableValueDomain;
 import com.hk.transformation.domain.response.ResponseResult;
 
 /**
@@ -31,11 +32,10 @@ public interface DynamicValueService {
 
     /**
      * 更新动态值
-     * @param key
-     * @param data
+     * @param request
      * @return 返回受到影响的值对象
      */
-    public ResponseResult updateTransformableValue(String key, Object data);
+    public ResponseResult updateTransformableValue(UpdateTransformableValueDomain request);
 
 
     /**
