@@ -1,6 +1,7 @@
 package com.hk.transformation.core.listen.singal;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author : HK意境
@@ -13,6 +14,7 @@ import lombok.Data;
  * @Version : 1.0
  */
 @Data
+@NoArgsConstructor
 public class ValueChangeData {
 
     /**
@@ -25,5 +27,8 @@ public class ValueChangeData {
      */
     private Object value;
 
-
+    public ValueChangeData(String key, Object value) {
+        this.key = key;
+        this.value = value;
+    }
 }

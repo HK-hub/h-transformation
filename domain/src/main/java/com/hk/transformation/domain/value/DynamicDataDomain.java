@@ -1,5 +1,10 @@
 package com.hk.transformation.domain.value;
 
+import lombok.Data;
+import lombok.experimental.Accessors;
+
+import java.util.Objects;
+
 /**
  * @author : HK意境
  * @ClassName : DynamicDataDomain
@@ -10,17 +15,20 @@ package com.hk.transformation.domain.value;
  * @Modified :
  * @Version : 1.0
  */
+@Data
+@Accessors(chain = true)
 public class DynamicDataDomain {
-
-    /**
-     * 等同于key: 如果为空默认，如果是属性字段=全类名.属性名，如果是方法=全类名#方法名
-     */
-    private String value;
 
     /**
      * 动态值的Key, 用于后期获取和修改进行定位
      */
     private String key;
+
+
+    /**
+     * 当前值
+     */
+    private Object value;
 
 
     /**
@@ -32,7 +40,7 @@ public class DynamicDataDomain {
     /**
      * 动态值的Class类型
      */
-    private Class<?> valueClass = void.class;
+    private Class<?> valueClass = this.value.getClass();
 
 
     /**

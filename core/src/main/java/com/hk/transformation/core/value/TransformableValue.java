@@ -112,6 +112,7 @@ public class TransformableValue implements Transformable{
         if (this.member instanceof Field field) {
 
             // 字段初始化: 赋初值，计算表达式
+            this.initialized.set(Boolean.FALSE);
             this.initialize(field, defaultValue, valueClass);
         } else if (this.member instanceof Method) {
 

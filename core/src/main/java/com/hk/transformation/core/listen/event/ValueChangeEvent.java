@@ -21,7 +21,6 @@ public class ValueChangeEvent extends TransformValueChangeEvent {
 
     private ValueChangeData data;
 
-
     public ValueChangeEvent(ValueChangeData data, Object source) {
         super(source);
         this.data = data;
