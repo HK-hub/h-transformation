@@ -79,36 +79,55 @@ public abstract class TransformationProcessor implements BeanPostProcessor, Prio
      */
     private List<Field> ensureTypeWaitProcessFields(Object bean) {
 
+        // 待处理字段列表
+        List<Field> waitProcessFields = new ArrayList<>();
+
         Class<?> beanClass = bean.getClass();
         DynamicValue dynamicValue = beanClass.getAnnotation(DynamicValue.class);
 
-        if (Objects.isNull(dynamicValue)) {
-            // 没有标注
-            return Collections.emptyList();
-        }
-
-        // 待处理字段列表
-        List<Field> waitProcessFields = new ArrayList<>();
         // 获取每个字段Field
         Field[] beanClassFields = beanClass.getFields();
-        for (Field field : beanClassFields) {
-            // 是否标注了 @IgnoreValue 注解, 是否 final修饰的字段
-            IgnoreValue ignoreValue = field.getAnnotation(IgnoreValue.class);
-            if (Objects.nonNull(ignoreValue)) {
-                continue;
-            }
+        // 类上标注了动态值注解
+        if (Objects.nonNull(dynamicValue)) {
 
-            // 判断修饰符
-            int modifiers = field.getModifiers();
-            if (Modifier.isFinal(modifiers)) {
-                // TODO final 修饰字段，不可更改: 后续想办法可以对对象类型的 final 字段也进行修改
-                continue;
-            }
+            // 对每个Field进行判断是否需要被动态化
+            for (Field field : beanClassFields) {
+                // 是否标注了 @IgnoreValue 注解, 是否 final修饰的字段
+                IgnoreValue ignoreValue = field.getAnnotation(IgnoreValue.class);
+                if (Objects.nonNull(ignoreValue)) {
+                    continue;
+                }
 
-            // 将字段加入待处理中
-            waitProcessFields.add(field);
+                // 判断修饰符
+                int modifiers = field.getModifiers();
+                if (Modifier.isFinal(modifiers)) {
+                    // TODO final 修饰字段，不可更改: 后续想办法可以对对象类型的 final 字段也进行修改
+                    continue;
+                }
+
+                // 将字段加入待处理中
+                waitProcessFields.add(field);
+            }
+        } else {
+            // 对每个Field进行判断是否需要被动态化
+            for (Field field : beanClassFields) {
+                // 是否标注了 @IgnoreValue 注解, 是否 final修饰的字段
+                DynamicValue annotation = field.getAnnotation(DynamicValue.class);
+                if (Objects.isNull(annotation)) {
+                    continue;
+                }
+
+                // 判断修饰符
+                int modifiers = field.getModifiers();
+                if (Modifier.isFinal(modifiers)) {
+                    // TODO final 修饰字段，不可更改: 后续想办法可以对对象类型的 final 字段也进行修改
+                    continue;
+                }
+
+                // 将字段加入待处理中
+                waitProcessFields.add(field);
+            }
         }
-
 
         return waitProcessFields;
     }

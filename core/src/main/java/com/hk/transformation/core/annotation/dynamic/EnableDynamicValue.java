@@ -17,5 +17,4 @@ public @interface EnableDynamicValue {
      */
     String[] packages() default {};
 
-
 }
