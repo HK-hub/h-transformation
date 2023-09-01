@@ -90,7 +90,6 @@ public class AutoUpdateValueChangeListener implements ValueChangeListener, Appli
     }
 
 
-
     @Override
     public void onApplicationEvent(ValueChangeEvent event) {
 
