@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.ReflectionUtils;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -163,7 +165,7 @@ public class DynamicValueHelper {
             Class<?> initValueClass = null;
             try {
                 initValue = field.get(bean);
-                initValueClass = initValue.getClass();
+                initValueClass = field.getType();
 
                 // 设置
                 dynamicValueBean.setValue(initValue.toString())
@@ -346,4 +348,6 @@ public class DynamicValueHelper {
         // 战时没有匹配的类型
         throw new ClassCastException("value:" + value + ", class is " + valueClass + ", can not convert to field class:" + fieldType);
     }
+
+
 }

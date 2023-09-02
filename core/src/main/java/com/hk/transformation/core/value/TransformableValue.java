@@ -7,9 +7,11 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.BeanFactory;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -34,13 +36,27 @@ public class TransformableValue implements Transformable{
 
     /**
      * 当前值
+     * TODO 暂时全部采用JSON 数据进行赋值，转换，调整等
      */
     protected Object value;
+
 
     /**
      * 注解
      */
     protected DynamicValueBean dynamicValueBean;
+
+
+    /**
+     * 动态值对象值类型
+     */
+    protected Class<?> valueClass;
+
+    /**
+     * 泛型类型：针对集合等类型
+     */
+    protected Type genericType;
+
 
     /**
      * bean 对象
@@ -80,6 +96,8 @@ public class TransformableValue implements Transformable{
         this.dynamicValueBean = dynamicValueBean;
         this.key = dynamicValueBean.getKey();
         this.value = dynamicValueBean.getDefaultValue();
+        this.valueClass = dynamicValueBean.getValueClass();
+        this.genericType = field.getGenericType();
         this.bean = bean;
         this.member = field;
         this.initialized.set(initialized);
@@ -112,7 +130,6 @@ public class TransformableValue implements Transformable{
         if (this.member instanceof Field field) {
 
             // 字段初始化: 赋初值，计算表达式
-            this.initialized.set(Boolean.FALSE);
             this.initialize(field, defaultValue, valueClass);
         } else if (this.member instanceof Method) {
 
@@ -121,6 +138,19 @@ public class TransformableValue implements Transformable{
         }
 
         return defaultValue;
+    }
+
+
+
+    @Override
+    public Object reset() {
+
+        // 保存重置之前的值
+        Object oldValue  = this.value;
+        this.initialized.set(Boolean.FALSE);
+        this.init();
+
+        return oldValue;
     }
 
 
@@ -147,10 +177,16 @@ public class TransformableValue implements Transformable{
         try{
             // 可以赋值并不代表能够赋值成功，还需要转换为需要的类型的值
             Object adaptiveValue = DynamicValueHelper.computeAdaptiveDynamicValue(bean, field, defaultValue, valueClass);
+
+            // 是否允许访问状态
+            boolean canAccess = field.canAccess(this.bean);
             field.setAccessible(true);
             // 转换成为需要的值类型
             field.set(this.bean, adaptiveValue);
+            field.setAccessible(canAccess);
 
+            // 设置初始值
+            this.value = adaptiveValue;
             // 设置为以及初始化
             this.initialized.set(true);
         }catch(Exception e){
@@ -162,12 +198,31 @@ public class TransformableValue implements Transformable{
 
     /**
      * 更新值
-     * @param value
-     * @return
+     * @param newValue 新值
+     * @return 返回旧值
      */
     @Override
-    public Object update(Object value) {
-        return null;
+    public Object update(Object newValue) {
+
+        // 获取旧值
+        Object oldValue = this.value;
+
+        if (this.member instanceof Field field) {
+            // 获取原来的访问权限
+            boolean canAccess = field.canAccess(this.bean);
+            // 设置值
+            try {
+                // 访问权限压制
+                field.setAccessible(true);
+                field.set(this.bean, newValue);
+                field.setAccessible(canAccess);
+            } catch (Exception e) {
+                log.warn("update dynamic value use by:{}, failed:", newValue, e);
+            }
+            this.value = newValue;
+        }
+
+        return oldValue;
     }
 
 }

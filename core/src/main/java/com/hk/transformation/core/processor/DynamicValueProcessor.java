@@ -81,7 +81,7 @@ public class DynamicValueProcessor extends AbstractTransformationProcessor imple
      * 注册Field字段或Method方法
      * @param bean
      * @param beanName
-     * @param member
+     * @param member field 成员属性或 method 成员方法
      * @param dynamicValue
      */
     private void doRegister(Object bean, String beanName, Member member, DynamicValueBean dynamicValue) {

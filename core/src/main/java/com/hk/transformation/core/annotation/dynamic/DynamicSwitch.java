@@ -34,6 +34,7 @@ public @interface DynamicSwitch {
 
     /**
      * 默认值,初始值
+     * TODO 暂时全部采用JSON 数据进行赋值，转换，调整等
      */
     boolean defaultValue() default false;
 

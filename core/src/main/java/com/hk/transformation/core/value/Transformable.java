@@ -14,16 +14,23 @@ public interface Transformable {
 
     /**
      * 更新
-     * @param value
-     * @return
+     * @param newValue
+     * @return 返回旧值
      */
-    public Object update(Object value);
+    public Object update(Object newValue);
 
 
     /**
      * 初始化或恢复默认值
-     * @return
+     * @return 返回初始之后的值
      */
     public Object init();
+
+
+    /**
+     * 重置
+     * @return 返回重置之前的值
+     */
+    public Object reset();
 
 }

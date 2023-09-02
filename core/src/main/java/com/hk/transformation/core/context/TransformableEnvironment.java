@@ -1,6 +1,7 @@
 package com.hk.transformation.core.context;
 
-import java.lang.reflect.Field;
+import com.hk.transformation.core.value.TransformableValue;
+import org.springframework.beans.factory.BeanFactory;
 
 /**
  * @author : HK意境
@@ -17,10 +18,11 @@ public interface TransformableEnvironment{
 
     /**
      * 添加可变字段
-     * @param key 注解标注key 属性
-     * @param field 成员字段
+     * @param beanFactory
+     * @param key 解标注key 属性
+     * @param value
      */
-    public void add(String key, Field field);
+    public boolean add(BeanFactory beanFactory, String key, TransformableValue value);
 
 
     /**

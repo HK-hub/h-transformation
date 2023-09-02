@@ -52,23 +52,10 @@ public class TransformValueRegistry {
     public void registry(BeanFactory beanFactory, String key, TransformableValue value) {
 
         Map<BeanFactory, Multimap<String, TransformableValue>> registry = context.getRegistry();
-
-        // 初始化注册中心
-        synchronized (context) {
-
-            // 是否包含该命名空间: beanFactory
-            if (BooleanUtils.isFalse(registry.containsKey(beanFactory))) {
-                registry.put(beanFactory, Multimaps.synchronizedListMultimap(LinkedListMultimap.create()));
-            }
-        }
-
-        // 注册
-        registry.get(beanFactory).put(key, value);
+        context.add(beanFactory, key, value);
 
         // 执行初始化逻辑
-        if (this.initialized.compareAndSet(false, true)) {
-            this.initialize(value);
-        }
+        this.initialize(value);
     }
 
 
@@ -103,9 +90,8 @@ public class TransformValueRegistry {
         // 执行对于的初始化逻辑
         try {
             if (member instanceof Field field) {
-
-                // 字段类型
-                DynamicValueHelper.assignField(field, value.getDynamicValueBean().getValue(), value.getDynamicValueBean().getValueClass());
+                // 初始化
+                value.init();
             } else if (member instanceof Method) {
                 // 方法类型
                 log.warn("dynamic method is not support..., please wait...");
