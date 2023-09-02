@@ -10,6 +10,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.core.Ordered;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -27,7 +28,7 @@ import java.util.Objects;
  * @Version : 1.0
  */
 @Slf4j
-public class DynamicValueProcessor extends TransformationProcessor implements BeanFactoryPostProcessor, BeanFactoryAware {
+public class DynamicValueProcessor extends AbstractTransformationProcessor implements BeanFactoryPostProcessor, BeanFactoryAware {
 
 
     private BeanFactory beanFactory;
@@ -74,6 +75,8 @@ public class DynamicValueProcessor extends TransformationProcessor implements Be
         this.doRegister(bean, beanName, field, dynamicValue);
     }
 
+
+
     /**
      * 注册Field字段或Method方法
      * @param bean
@@ -103,6 +106,7 @@ public class DynamicValueProcessor extends TransformationProcessor implements Be
         log.info("H-Transformation starting to monitoring dynamic value:{}", value);
     }
 
+
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
         this.beanFactory = beanFactory;
@@ -115,6 +119,6 @@ public class DynamicValueProcessor extends TransformationProcessor implements Be
 
     @Override
     public int getOrder() {
-        return 0;
+        return Ordered.LOWEST_PRECEDENCE;
     }
 }

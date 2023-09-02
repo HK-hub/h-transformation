@@ -5,17 +5,19 @@ import com.hk.transformation.core.annotation.dynamic.IgnoreValue;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.PriorityOrdered;
+import org.springframework.util.ReflectionUtils;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
 /**
  * @author : HK意境
- * @ClassName : TransformationProcessor
+ * @ClassName : AbstractTransformationProcessor
  * @date : 2023/8/16 16:34
  * @description :  动态处理器，定义模板接口
  * @Todo :
@@ -23,7 +25,7 @@ import java.util.Objects;
  * @Modified :
  * @Version : 1.0
  */
-public abstract class TransformationProcessor implements BeanPostProcessor, PriorityOrdered {
+public abstract class AbstractTransformationProcessor implements BeanPostProcessor, PriorityOrdered {
 
 
     /**
@@ -36,15 +38,14 @@ public abstract class TransformationProcessor implements BeanPostProcessor, Prio
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 
-
         // 反射获取Bean对象内的所有Field进行处理
-        List<Field> fieldList = this.ensureTypeWaitProcessFields(bean);
+        List<Field> fieldList = this.findAllField(bean.getClass());
         for (Field field : fieldList) {
             this.processField(bean, beanName, field);
         }
 
         // 反射获取Bean对象的所有Method进行处理
-        List<Method> methodList = this.ensureTypeWaitProcessMethods(bean);
+        List<Method> methodList = this.findAllMethod(bean.getClass());
         for (Method method : methodList) {
             this.processMethod(bean, beanName, method);
         }
@@ -60,7 +61,6 @@ public abstract class TransformationProcessor implements BeanPostProcessor, Prio
      * @param method
      */
     protected abstract void processMethod(Object bean, String beanName, Method method);
-
 
 
     /**
@@ -132,8 +132,6 @@ public abstract class TransformationProcessor implements BeanPostProcessor, Prio
         return waitProcessFields;
     }
 
-
-
     /**
      * 获取需要处理的方法
      * @param bean
@@ -145,7 +143,6 @@ public abstract class TransformationProcessor implements BeanPostProcessor, Prio
 
         // 待处理集合
         List<Method> waitProcessMethods = new ArrayList<>();
-
 
         // 获取所有的方法
         Method[] methods = beanClass.getMethods();
@@ -161,7 +158,36 @@ public abstract class TransformationProcessor implements BeanPostProcessor, Prio
         return waitProcessMethods;
     }
 
+    /**
+     * 获取类下所有字段，及其父类字段
+     * @param clazz
+     * @return
+     */
+    private List<Field> findAllField(Class<?> clazz) {
+        final List<Field> res = new LinkedList<>();
+        ReflectionUtils.doWithFields(clazz, res::add);
+        return res;
+    }
 
+    /**
+     * 获取类下所有方法，及其父类方法
+     * @param clazz
+     * @return
+     */
+    private List<Method> findAllMethod(Class<?> clazz) {
+        final List<Method> res = new LinkedList<>();
+        ReflectionUtils.doWithMethods(clazz, res::add);
+        return res;
+    }
+
+
+    /**
+     * 初始化后处理
+     * @param bean
+     * @param beanName
+     * @return
+     * @throws BeansException
+     */
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         return BeanPostProcessor.super.postProcessAfterInitialization(bean, beanName);

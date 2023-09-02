@@ -9,12 +9,15 @@ import com.hk.transformation.core.value.TransformableValue;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,11 +85,20 @@ public class AutoUpdateValueChangeListener implements ValueChangeListener, Appli
         return newValue;
     }
 
+
+    /**
+     * 设置ApplicationContext 和 BeanFactory
+     * @param applicationContext
+     * @throws BeansException
+     */
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 
         this.applicationContext = applicationContext;
         this.transformValueRegistry = this.applicationContext.getBean(TransformValueRegistry.class);
+
+        // 注入BeanFactory
+        this.beanFactory = ((ConfigurableApplicationContext) applicationContext).getBeanFactory();
     }
 
 
@@ -96,4 +108,5 @@ public class AutoUpdateValueChangeListener implements ValueChangeListener, Appli
         // 处理变更事件
         this.onChange(event.getData());
     }
+
 }

@@ -12,8 +12,7 @@ import java.lang.reflect.Field;
  * @Modified :
  * @Version : 1.0
  */
-public interface Transformable {
-
+public interface TransformableEnvironment{
 
 
     /**

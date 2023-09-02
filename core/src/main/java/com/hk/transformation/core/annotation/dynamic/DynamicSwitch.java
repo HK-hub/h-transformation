@@ -20,6 +20,12 @@ import java.lang.annotation.*;
 public @interface DynamicSwitch {
 
     /**
+     * 等同于key: 如果为空默认，如果是属性字段=全类名.属性名，如果是方法=全类名#方法名
+     */
+    @AliasFor("key")
+    String value() default "";
+
+    /**
      * 动态值的Key, 用于后期获取和修改进行定位
      */
     @AliasFor("value")

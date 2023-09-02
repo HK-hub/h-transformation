@@ -29,7 +29,7 @@ public @interface DynamicValue {
     /**
      * 动态值的Key, 用于后期获取和修改进行定位
      */
-    @AliasFor("key")
+    @AliasFor("value")
     String key() default "";
 
 

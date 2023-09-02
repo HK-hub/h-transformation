@@ -43,11 +43,11 @@ public class DynamicValueHelper {
 
         DynamicValueBean dynamicValueBean = new DynamicValueBean();
         // 获取Field字段上的@DynamicValue注解
-        DynamicValue dynamicValue = AnnotationUtils.getAnnotation(field, DynamicValue.class);
+        DynamicValue dynamicValue = AnnotationUtils.findAnnotation(field, DynamicValue.class);
 
         if (Objects.nonNull(dynamicValue)) {
             // 获取Key: 因为使用了@AliasFor 注解和 key() 属性是相通的
-            String key = (String) AnnotationUtils.getValue(dynamicValue);
+            String key = dynamicValue.key();
             if (StringUtils.isBlank(key)) {
                 // key 是默认值或者空的, 采用字段的全限定名称
                 String clazzName = field.getDeclaringClass().getName();
@@ -66,6 +66,7 @@ public class DynamicValueHelper {
                     Object initValue = field.get(bean);
                     if (Objects.nonNull(initValue)) {
                         // 非空，进行赋值
+                        // TODO 修改为JSON赋值，转换方式
                         value = ReflectUtil.valueToAdaptiveString(initValue);
                     }
                 } catch (IllegalAccessException e) {
@@ -93,10 +94,10 @@ public class DynamicValueHelper {
         }
 
         // @DynamicValue 注解为空，判断是否为添加了@DynamicSwitch 注解
-        DynamicSwitch dynamicSwitch = AnnotationUtils.getAnnotation(field, DynamicSwitch.class);
+        DynamicSwitch dynamicSwitch = AnnotationUtils.findAnnotation(field, DynamicSwitch.class);
         if (Objects.nonNull(dynamicSwitch)) {
             // 获取Key: 因为使用了@AliasFor 注解和 key() 属性是相通的
-            String key = (String) AnnotationUtils.getValue(dynamicSwitch);
+            String key = dynamicSwitch.key();
             if (StringUtils.isBlank(key)) {
                 // key 是默认值或者空的, 采用字段的全限定名称
                 String clazzName = field.getDeclaringClass().getName();
