@@ -1,5 +1,6 @@
 package com.hk.transformation.core.value;
 
+import com.google.common.reflect.Reflection;
 import com.hk.transformation.core.helper.DynamicValueHelper;
 import com.hk.transformation.core.reflect.util.ReflectUtil;
 import lombok.Data;
@@ -7,6 +8,8 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;

@@ -18,6 +18,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.hk</groupId>
+            <artifactId>core</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.google.ortools</groupId>
             <artifactId>ortools-java</artifactId>
             <version>9.6.2534</version>
