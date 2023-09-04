@@ -3,6 +3,8 @@ package com.hk.transformation.core.context;
 import com.hk.transformation.core.value.TransformableValue;
 import org.springframework.beans.factory.BeanFactory;
 
+import java.util.List;
+
 /**
  * @author : HK意境
  * @ClassName : Transformable
@@ -14,6 +16,23 @@ import org.springframework.beans.factory.BeanFactory;
  * @Version : 1.0
  */
 public interface TransformableEnvironment{
+
+
+    /**
+     * 获取指定beanFactory 和 key下动态值列表
+     * @param beanFactory
+     * @param key
+     * @return
+     */
+    public List<TransformableValue> get(BeanFactory beanFactory, String key);
+
+
+    /**
+     * 获取指定key下所有动态值列表
+     * @param key
+     * @return
+     */
+    public List<TransformableValue> get(String key);
 
 
     /**

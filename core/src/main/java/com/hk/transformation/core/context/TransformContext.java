@@ -7,12 +7,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ClassUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.BeanFactory;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author : HK意境
@@ -32,6 +35,49 @@ public class TransformContext extends AbstractTransformableEnvironment {
      * Context实例
      */
     private static final TransformContext INSTANCE = new TransformContext();
+
+
+    /**
+     * 获取值指定key和beanFactory 下动态值对象列表
+     * @param beanFactory
+     * @param key
+     * @return
+     */
+    @Override
+    public List<TransformableValue> get(BeanFactory beanFactory, String key) {
+
+        Map<BeanFactory, Multimap<String, TransformableValue>> registry = this.registry;
+        Multimap<String, TransformableValue> valueMultimap = registry.get(beanFactory);
+
+        // 获取Key 下value 值对象集合
+        Collection<TransformableValue> transformableValues = valueMultimap.get(key);
+
+        // 这里是可以类型转换的，声明的时候使用的LinkedList
+        return (List<TransformableValue>) transformableValues;
+    }
+
+
+    /**
+     * 获取指定key下动态值列表
+     * @param key
+     * @return
+     */
+    @Override
+    public List<TransformableValue> get(String key) {
+
+        ArrayList<@Nullable TransformableValue> transformValueList = Lists.newArrayList();
+
+        // 取出所有key下对应集合
+        Collection<Multimap<String, TransformableValue>> values = this.registry.values();
+        for (Multimap<String, TransformableValue> multimap : values) {
+            Collection<TransformableValue> valueCollection = multimap.get(key);
+            // 添加到集合中
+            transformValueList.addAll(valueCollection);
+        }
+
+        return transformValueList;
+    }
+
 
 
     /**
@@ -71,10 +117,27 @@ public class TransformContext extends AbstractTransformableEnvironment {
     }
 
 
+    /**
+     * 更新
+     * @param key
+     * @param value
+     */
     @Override
     public void update(String key, Object value) {
 
+        Collection<Multimap<String, TransformableValue>> values = this.registry.values();
+        for (Multimap<String, TransformableValue> multimap : values) {
+            Collection<TransformableValue> transformableValueCollection = multimap.get(key);
 
+            // key下集合不为空
+            if (CollectionUtils.isNotEmpty(transformableValueCollection)) {
+                // TODO 后续抽取成为异步更新
+                for (TransformableValue transformableValue : transformableValueCollection) {
+                    // 进行更新
+                    transformableValue.update(value);
+                }
+            }
+        }
     }
 
 
@@ -93,7 +156,11 @@ public class TransformContext extends AbstractTransformableEnvironment {
     }
 
 
-
+    /**
+     * 删除指定key， 指定类下的属性字段动态值
+     * @param key
+     * @param clazz
+     */
     @Override
     public void remove(String key, Class<?> clazz) {
         Collection<Multimap<String, TransformableValue>> values = this.registry.values();

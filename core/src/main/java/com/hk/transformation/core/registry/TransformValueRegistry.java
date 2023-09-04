@@ -51,7 +51,7 @@ public class TransformValueRegistry {
      */
     public void registry(BeanFactory beanFactory, String key, TransformableValue value) {
 
-        Map<BeanFactory, Multimap<String, TransformableValue>> registry = context.getRegistry();
+        // 注册
         context.add(beanFactory, key, value);
 
         // 执行初始化逻辑
@@ -67,14 +67,7 @@ public class TransformValueRegistry {
      */
     public List<TransformableValue> get(BeanFactory beanFactory, String key) {
 
-        Map<BeanFactory, Multimap<String, TransformableValue>> registry = this.context.getRegistry();
-        Multimap<String, TransformableValue> valueMultimap = registry.get(beanFactory);
-
-        // 获取Key 下value 值对象集合
-        Collection<TransformableValue> transformableValues = valueMultimap.get(key);
-
-        // 这里是可以类型转换的，声明的时候使用的LinkedList
-        return (List<TransformableValue>) transformableValues;
+       return this.context.get(beanFactory, key);
     }
 
 

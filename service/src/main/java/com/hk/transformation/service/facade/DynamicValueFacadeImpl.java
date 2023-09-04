@@ -9,6 +9,7 @@ import com.hk.transformation.core.value.DynamicValueBean;
 import com.hk.transformation.core.value.TransformableValue;
 import com.hk.transformation.domain.value.DynamicDataDomain;
 import com.hk.transformation.facade.DynamicValueFacade;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -26,6 +27,7 @@ import java.util.*;
  * @Modified :
  * @Version : 1.0
  */
+@Slf4j
 @Component
 public class DynamicValueFacadeImpl implements DynamicValueFacade {
 
@@ -140,11 +142,12 @@ public class DynamicValueFacadeImpl implements DynamicValueFacade {
 
         // 进行重置
         List<DynamicDataDomain> dynamicDataDomainList = needResetValueList.stream().map(needResetValue -> {
-            needResetValue.init();
+            needResetValue.reset();
             return this.convertToDynamicDataDomain(needResetValue);
         }).toList();
 
         // 返回受到影响的对象
+        log.info("reset key:{}, dynamicValues:{}", key, needResetValueList);
         return dynamicDataDomainList;
     }
 
@@ -161,19 +164,20 @@ public class DynamicValueFacadeImpl implements DynamicValueFacade {
         Map<BeanFactory, Multimap<String, TransformableValue>> registry = transformContext.getRegistry();
 
         // 将需要被重置的对象采集出来
-        List<TransformableValue> needResetValueList = new ArrayList<>();
+        List<TransformableValue> needRemoveValueList = new ArrayList<>();
 
         for (Multimap<String, TransformableValue> multimap : registry.values()) {
             // 移除Key下对应值对象列表
             if (multimap.containsKey(key)) {
                 // 移除值对象并返回
                 Collection<TransformableValue> removeValueList = multimap.removeAll(key);
-                needResetValueList.addAll(removeValueList);
+                needRemoveValueList.addAll(removeValueList);
             }
         }
 
         // 转换为响应对象
-        List<DynamicDataDomain> dynamicDataDomainList = needResetValueList.stream().map(this::convertToDynamicDataDomain).toList();
+        List<DynamicDataDomain> dynamicDataDomainList = needRemoveValueList.stream().map(this::convertToDynamicDataDomain).toList();
+        log.info("remove key:{}, dynamicValues:{}", key, needRemoveValueList);
         return dynamicDataDomainList;
     }
 

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.Ordered;
 
+import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -33,10 +34,14 @@ public class DynamicValueProcessor extends AbstractTransformationProcessor imple
 
     private BeanFactory beanFactory;
 
-    private final TransformValueRegistry transformValueRegistry;
+    /**
+     * 通过依赖注入方式注入注册中心
+     */
+    @Resource
+    private TransformValueRegistry transformValueRegistry;
 
-    public DynamicValueProcessor(TransformValueRegistry transformValueRegistry) {
-        this.transformValueRegistry = transformValueRegistry;
+    public DynamicValueProcessor() {
+
     }
 
     /**
