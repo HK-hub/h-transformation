@@ -68,6 +68,4 @@ public class TestBean {
     private Date[] dateArray;
     private LocalDate[] localDateArray;
 
-
-
 }
