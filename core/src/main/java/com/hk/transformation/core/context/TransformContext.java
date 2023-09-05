@@ -65,7 +65,7 @@ public class TransformContext extends AbstractTransformableEnvironment {
     @Override
     public List<TransformableValue> get(String key) {
 
-        ArrayList<@Nullable TransformableValue> transformValueList = Lists.newArrayList();
+        List<TransformableValue> transformValueList = Lists.newArrayList();
 
         // 取出所有key下对应集合
         Collection<Multimap<String, TransformableValue>> values = this.registry.values();
@@ -146,13 +146,22 @@ public class TransformContext extends AbstractTransformableEnvironment {
      * @param key
      */
     @Override
-    public void remove(String key) {
-        Collection<Multimap<String, TransformableValue>> values = this.registry.values();
-        for (Multimap<String, TransformableValue> multimap : values) {
+    public List<TransformableValue> remove(String key) {
+
+        // 将需要被重置的对象采集出来
+        List<TransformableValue> needRemoveValueList = new ArrayList<>();
+
+        for (Multimap<String, TransformableValue> multimap : registry.values()) {
+            // 移除Key下对应值对象列表
             if (multimap.containsKey(key)) {
-                multimap.removeAll(key);
+                // 移除值对象并返回
+                Collection<TransformableValue> removeValueList = multimap.removeAll(key);
+                needRemoveValueList.addAll(removeValueList);
             }
         }
+
+        // 返回被移除的key 对应的动态值对象
+        return needRemoveValueList;
     }
 
 
@@ -162,9 +171,11 @@ public class TransformContext extends AbstractTransformableEnvironment {
      * @param clazz
      */
     @Override
-    public void remove(String key, Class<?> clazz) {
-        Collection<Multimap<String, TransformableValue>> values = this.registry.values();
-        for (Multimap<String, TransformableValue> multimap : values) {
+    public List<TransformableValue> remove(String key, Class<?> clazz) {
+
+        // 返回被移除的动态值对象集合
+        List<TransformableValue> removedTransformableValues = Lists.newArrayList();
+        for (Multimap<String, TransformableValue> multimap : this.registry.values()) {
 
             // 获取key 下集合
             Collection<TransformableValue> valueCollection = multimap.get(key);
@@ -172,7 +183,7 @@ public class TransformContext extends AbstractTransformableEnvironment {
                 continue;
             }
 
-            // 删除key 下符合类型的值对象
+            // 删除key 下符合Class类型的值对象
             for (TransformableValue transformableValue : valueCollection) {
 
                 // 代理对象
@@ -181,13 +192,17 @@ public class TransformContext extends AbstractTransformableEnvironment {
                 // 判断直接类型
                 if (ClassUtils.isAssignable(clazz, bean.getClass())) {
                     valueCollection.remove(transformableValue);
+                    removedTransformableValues.add(transformableValue);
 
                 } else if (AopProxyUtils.ultimateTargetClass(bean).isAssignableFrom(clazz)) {
                     // 判断代理目标对象类型
                     valueCollection.remove(transformableValue);
+                    removedTransformableValues.add(transformableValue);
                 }
             }
         }
+
+        return removedTransformableValues;
     }
 
 

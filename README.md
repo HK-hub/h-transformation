@@ -77,6 +77,19 @@ public class TestBean {
 - [ ] 支持适配的灰度发布，测试环境等
 - [ ] 未来将实现不依赖数据库等存储中间件的配置持久化和初始化功能
 
+刚看了一个类  其他的没看  感觉开始使用的数据结构考虑的场景不足：
+  1.多配置中心
+  2.多环境
+  3.并发、JDK数据结构选型问题
+  4.性能问题
+  5.兼容性问题
+  6.偏CRUD
+  7.设计上比较重，不够轻量级
+  8.动态感知
+  9.对其他注册中心的支持
+  10.其他
+,多端、多节点配置同步
+
 ## 参考文献
 [企业级代码探究: @Value + Apollo动态刷新原理~](https://juejin.cn/post/7246049169306173495)
 [Spring 注解（二）注解工具类 AnnotationUtils 和 AnnotatedElementUtils](https://www.cnblogs.com/binarylei/p/10415585.html)

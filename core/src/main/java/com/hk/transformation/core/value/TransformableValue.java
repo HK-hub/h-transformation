@@ -1,6 +1,5 @@
 package com.hk.transformation.core.value;
 
-import com.google.common.reflect.Reflection;
 import com.hk.transformation.core.helper.DynamicValueHelper;
 import com.hk.transformation.core.reflect.util.ReflectUtil;
 import lombok.Data;
@@ -8,9 +7,6 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -144,7 +140,10 @@ public class TransformableValue implements Transformable{
     }
 
 
-
+    /**
+     * 重置值
+     * @return
+     */
     @Override
     public Object reset() {
 
@@ -215,14 +214,16 @@ public class TransformableValue implements Transformable{
             boolean canAccess = field.canAccess(this.bean);
             // 设置值
             try {
+                // 计算出适配的值
+                Object adaptiveValue = DynamicValueHelper.computeAdaptiveDynamicValue(this.bean, (Field) this.member, newValue, newValue.getClass());
                 // 访问权限压制
                 field.setAccessible(true);
-                field.set(this.bean, newValue);
+                field.set(this.bean, adaptiveValue);
                 field.setAccessible(canAccess);
+                this.value = adaptiveValue;
             } catch (Exception e) {
                 log.warn("update dynamic value use by:{}, failed:", newValue, e);
             }
-            this.value = newValue;
         }
 
         return oldValue;

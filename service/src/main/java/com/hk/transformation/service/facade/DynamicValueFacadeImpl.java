@@ -1,7 +1,6 @@
 package com.hk.transformation.service.facade;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 import com.hk.transformation.core.context.TransformContext;
 import com.hk.transformation.core.listen.event.ValueChangeEvent;
 import com.hk.transformation.core.listen.singal.ValueChangeData;
@@ -10,8 +9,6 @@ import com.hk.transformation.core.value.TransformableValue;
 import com.hk.transformation.domain.value.DynamicDataDomain;
 import com.hk.transformation.facade.DynamicValueFacade;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
@@ -44,30 +41,15 @@ public class DynamicValueFacadeImpl implements DynamicValueFacade {
     @Override
     public List<DynamicDataDomain> getAllDynamicValues() {
 
-        // 获取装在值对象的Map集合
-        Map<BeanFactory, Multimap<String, TransformableValue>> registry = transformContext.getRegistry();
+        // 获取全部动态值集合
+        List<TransformableValue> transformableValueList = this.transformContext.all();
 
-        // 获取全部值集合
-        Collection<Multimap<String, TransformableValue>> transformMultimapCollection = registry.values();
-        if (CollectionUtils.isEmpty(transformMultimapCollection)) {
-            return Collections.emptyList();
-        }
-
-        // 将集合合并到一个List中
-        List<DynamicDataDomain> dynamicDataDomainList = new ArrayList<>(transformMultimapCollection.size());
-
-        for (Multimap<String, TransformableValue> multimap : transformMultimapCollection) {
-            Collection<TransformableValue> transformableValueCollection = multimap.values();
-            // 转换为DynamicDataDomain
-            List<DynamicDataDomain> dynamicDataDomains = transformableValueCollection.stream()
-                    .map(this::convertToDynamicDataDomain).toList();
-
-            // 添加到集合中
-            dynamicDataDomainList.addAll(dynamicDataDomains);
-        }
+        // 转换为DynamicDataDomain
+        List<DynamicDataDomain> dynamicDataDomains = transformableValueList.stream().map(this::convertToDynamicDataDomain).toList();
+        log.info("get all dynamic values:size={},elements={}", dynamicDataDomains.size(), dynamicDataDomains);
 
         // 进行转换
-        return dynamicDataDomainList;
+        return dynamicDataDomains;
     }
 
 
@@ -79,18 +61,8 @@ public class DynamicValueFacadeImpl implements DynamicValueFacade {
     @Override
     public List<DynamicDataDomain> getDynamicValuesByKey(String key) {
 
-        // 获取装在值对象的Map集合
-        Map<BeanFactory, Multimap<String, TransformableValue>> registry = transformContext.getRegistry();
-        Collection<Multimap<String, TransformableValue>> multimapCollection = registry.values();
-
-        // 依次取出Multimap查找指定key 下的动态值对象集合
-        List<TransformableValue> transformableValueList = new ArrayList<>();
-        for (Multimap<String, TransformableValue> multimap : multimapCollection) {
-            Collection<TransformableValue> valueCollection = multimap.get(key);
-            if (CollectionUtils.isNotEmpty(valueCollection)) {
-                transformableValueList.addAll(valueCollection);
-            }
-        }
+        // 通过context 对象获取key 下对应动态值对象列表
+        List<TransformableValue> transformableValueList = this.transformContext.get(key);
 
         // 进行转换
         List<DynamicDataDomain> dynamicDataDomainList = transformableValueList.stream().map(this::convertToDynamicDataDomain).toList();
@@ -127,27 +99,18 @@ public class DynamicValueFacadeImpl implements DynamicValueFacade {
     @Override
     public List<DynamicDataDomain> reset(String key) {
 
-        // 获取装在值对象的Map集合
-        Map<BeanFactory, Multimap<String, TransformableValue>> registry = transformContext.getRegistry();
-
-        // 将需要被重置的对象采集出来
-        List<TransformableValue> needResetValueList = new ArrayList<>();
-        for (Multimap<String, TransformableValue> multimap : registry.values()) {
-            Collection<TransformableValue> valueCollection = multimap.get(key);
-            if (CollectionUtils.isNotEmpty(valueCollection)) {
-                needResetValueList.addAll(valueCollection);
-            }
-        }
+        // 获取key下集合
+        List<TransformableValue> transformableValues = this.transformContext.get(key);
 
 
         // 进行重置
-        List<DynamicDataDomain> dynamicDataDomainList = needResetValueList.stream().map(needResetValue -> {
+        List<DynamicDataDomain> dynamicDataDomainList = transformableValues.stream().map(needResetValue -> {
             needResetValue.reset();
             return this.convertToDynamicDataDomain(needResetValue);
         }).toList();
 
         // 返回受到影响的对象
-        log.info("reset key:{}, dynamicValues:{}", key, needResetValueList);
+        log.info("reset key:{}, dynamicValues:{}", key, dynamicDataDomainList);
         return dynamicDataDomainList;
     }
 
@@ -160,20 +123,8 @@ public class DynamicValueFacadeImpl implements DynamicValueFacade {
     @Override
     public List<DynamicDataDomain> remove(String key) {
 
-        // 获取装在值对象的Map集合
-        Map<BeanFactory, Multimap<String, TransformableValue>> registry = transformContext.getRegistry();
-
-        // 将需要被重置的对象采集出来
-        List<TransformableValue> needRemoveValueList = new ArrayList<>();
-
-        for (Multimap<String, TransformableValue> multimap : registry.values()) {
-            // 移除Key下对应值对象列表
-            if (multimap.containsKey(key)) {
-                // 移除值对象并返回
-                Collection<TransformableValue> removeValueList = multimap.removeAll(key);
-                needRemoveValueList.addAll(removeValueList);
-            }
-        }
+        // 移除值对象集合
+        List<TransformableValue> needRemoveValueList = this.transformContext.remove(key);
 
         // 转换为响应对象
         List<DynamicDataDomain> dynamicDataDomainList = needRemoveValueList.stream().map(this::convertToDynamicDataDomain).toList();

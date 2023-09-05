@@ -36,6 +36,13 @@ public interface TransformableEnvironment{
 
 
     /**
+     * 获取所有值对象集合
+     * @return
+     */
+    public List<TransformableValue> all();
+
+
+    /**
      * 添加可变字段
      * @param beanFactory
      * @param key 解标注key 属性
@@ -56,7 +63,7 @@ public interface TransformableEnvironment{
      * 移除key 下全部 Field字段
      * @param key
      */
-    public void remove(String key);
+    public List<TransformableValue> remove(String key);
 
 
     /**
@@ -64,7 +71,7 @@ public interface TransformableEnvironment{
      * @param key
      * @param clazz
      */
-    public void remove(String key, Class<?> clazz);
+    public List<TransformableValue> remove(String key, Class<?> clazz);
 
 
 
