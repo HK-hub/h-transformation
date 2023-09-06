@@ -76,6 +76,7 @@ public class DynamicValueServiceImpl implements DynamicValueService{
                     .setData(e.getMessage());
         }
 
+        log.info("get dynamic values by key:{}, domain:{}", key, dynamicDataDomains);
         return ResponseResult.SUCCESS(dynamicDataDomains);
     }
 

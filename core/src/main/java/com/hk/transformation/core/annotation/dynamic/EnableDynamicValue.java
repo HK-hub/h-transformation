@@ -1,5 +1,10 @@
 package com.hk.transformation.core.annotation.dynamic;
 
+import com.hk.transformation.core.config.TransformationAutoConfiguration;
+import org.springframework.context.annotation.Import;
+
+import java.lang.annotation.*;
+
 /**
  * @author : HK意境
  * @ClassName : EnableDynamicValue
@@ -10,6 +15,10 @@ package com.hk.transformation.core.annotation.dynamic;
  * @Modified :
  * @Version : 1.0
  */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Documented
+@Import(TransformationAutoConfiguration.class)
 public @interface EnableDynamicValue {
 
     /**

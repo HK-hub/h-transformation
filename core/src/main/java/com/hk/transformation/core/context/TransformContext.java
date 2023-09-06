@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ClassUtils;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.BeanFactory;
 
@@ -206,6 +205,10 @@ public class TransformContext extends AbstractTransformableEnvironment {
     }
 
 
+    /**
+     * 保持上下文对象的全局单例
+     * @return
+     */
     public static TransformContext getInstance() {
         return INSTANCE;
     }

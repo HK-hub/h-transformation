@@ -2,7 +2,6 @@ package com.hk.transformation.core.listen.listener;
 
 import com.google.common.collect.Lists;
 import com.hk.transformation.core.context.ObservationContext;
-import com.hk.transformation.core.helper.DynamicValueHelper;
 import com.hk.transformation.core.listen.event.ValueChangeEvent;
 import com.hk.transformation.core.listen.singal.ValueChangeData;
 import com.hk.transformation.core.registry.TransformValueRegistry;
@@ -16,6 +15,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,13 +34,17 @@ import java.util.List;
 @Component
 public class AutoUpdateValueChangeListener implements ValueChangeListener, ApplicationListener<ValueChangeEvent>, ApplicationContextAware {
 
+    // 注册中心
+    @Resource
     private TransformValueRegistry transformValueRegistry;
 
     private ConfigurableBeanFactory beanFactory;
 
     private ApplicationContext applicationContext;
 
-    private ObservationContext observationContext = ObservationContext.getInstance();
+    // 观察者上下文
+    @Resource
+    private ObservationContext observationContext;
 
 
     public AutoUpdateValueChangeListener() {

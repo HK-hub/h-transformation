@@ -4,10 +4,14 @@ package com.hk.transformation.core.processor;
 import com.hk.transformation.core.annotation.observation.DynamicObserver;
 import com.hk.transformation.core.context.ObservationContext;
 import com.hk.transformation.core.listen.observation.observer.ValueObserver;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 import java.util.Objects;
 
 /**
@@ -20,9 +24,22 @@ import java.util.Objects;
  * @Modified :
  * @Version : 1.0
  */
+@Slf4j
 public class DynamicValueObserverProcessor implements BeanPostProcessor {
 
-    private ObservationContext context = ObservationContext.getInstance();
+
+    /**
+     * 观察者上下文
+     */
+    private ObservationContext context;
+
+    /**
+     * 构造器注入
+     * @param observationContext
+     */
+    public DynamicValueObserverProcessor(ObservationContext observationContext) {
+        this.context = observationContext;
+    }
 
 
     /**

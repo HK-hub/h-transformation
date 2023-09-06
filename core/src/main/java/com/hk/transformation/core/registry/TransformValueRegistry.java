@@ -1,21 +1,14 @@
 package com.hk.transformation.core.registry;
 
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import com.hk.transformation.core.context.TransformContext;
-import com.hk.transformation.core.helper.DynamicValueHelper;
 import com.hk.transformation.core.value.TransformableValue;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.BeanFactory;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -29,6 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @Version : 1.0
  */
 @Slf4j
+@NoArgsConstructor
 public class TransformValueRegistry {
 
 
@@ -41,7 +35,12 @@ public class TransformValueRegistry {
     /**
      * 环境
      */
-    private final TransformContext context = TransformContext.getInstance();
+    private TransformContext context;
+
+
+    public TransformValueRegistry(TransformContext context) {
+        this.context = context;
+    }
 
     /**
      * 注册到Context环境，Spring 环境

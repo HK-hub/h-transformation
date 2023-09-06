@@ -4,6 +4,7 @@ import com.hk.transformation.core.helper.DynamicValueHelper;
 import com.hk.transformation.core.registry.TransformValueRegistry;
 import com.hk.transformation.core.value.DynamicValueBean;
 import com.hk.transformation.core.value.TransformableValue;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -29,6 +30,7 @@ import java.util.Objects;
  * @Version : 1.0
  */
 @Slf4j
+@NoArgsConstructor
 public class DynamicValueProcessor extends AbstractTransformationProcessor implements BeanFactoryPostProcessor, BeanFactoryAware {
 
 
@@ -37,11 +39,15 @@ public class DynamicValueProcessor extends AbstractTransformationProcessor imple
     /**
      * 通过依赖注入方式注入注册中心
      */
-    @Resource
     private TransformValueRegistry transformValueRegistry;
 
-    public DynamicValueProcessor() {
 
+    /**
+     * 构造器注入
+     * @param transformValueRegistry
+     */
+    public DynamicValueProcessor(TransformValueRegistry transformValueRegistry) {
+        this.transformValueRegistry = transformValueRegistry;
     }
 
     /**
@@ -53,7 +59,7 @@ public class DynamicValueProcessor extends AbstractTransformationProcessor imple
     @Override
     protected void processMethod(Object bean, String beanName, Method method) {
 
-        log.info("暂不支持方法更新，敬请期待...");
+        // log.info("暂不支持方法更新，敬请期待...");
     }
 
 
@@ -69,15 +75,11 @@ public class DynamicValueProcessor extends AbstractTransformationProcessor imple
         // 将注解计算出来
         DynamicValueBean dynamicValue = DynamicValueHelper.computeDynamicFieldAnnotation(bean, field);
 
-        // 是否能够计算出来注解对象
-        if (Objects.isNull(dynamicValue)) {
-            // 不能成功得出，无法注册进入
-            log.warn("object:{}, field:{}, failed to build dynamicValueBean, can not to register to context", bean, field);
-            return;
+        // 能够计算出来注解对象
+        if (Objects.nonNull(dynamicValue)) {
+            // 注册到Context中
+            this.doRegister(bean, beanName, field, dynamicValue);
         }
-
-        // 注册到Context中
-        this.doRegister(bean, beanName, field, dynamicValue);
     }
 
 

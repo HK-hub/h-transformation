@@ -22,7 +22,6 @@ import java.util.Set;
  * @Modified :
  * @Version : 1.0
  */
-@Component
 @DynamicValue(defaultValue = "{1,2,4,5}", key = "test")
 public class TestBean {
 
