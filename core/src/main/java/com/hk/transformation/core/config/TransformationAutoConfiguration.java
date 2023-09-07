@@ -1,15 +1,12 @@
 package com.hk.transformation.core.config;
 
-import com.hk.transformation.core.annotation.dynamic.EnableDynamicValue;
 import com.hk.transformation.core.context.ObservationContext;
 import com.hk.transformation.core.context.TransformContext;
 import com.hk.transformation.core.processor.DynamicValueObserverProcessor;
 import com.hk.transformation.core.processor.DynamicValueProcessor;
 import com.hk.transformation.core.registry.TransformValueRegistry;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -23,8 +20,6 @@ import org.springframework.context.annotation.Configuration;
  * @Version : 1.0
  */
 @Configuration
-@ComponentScan("com.hk.transformation")
-@ConditionalOnClass(EnableDynamicValue.class)
 public class TransformationAutoConfiguration {
 
 

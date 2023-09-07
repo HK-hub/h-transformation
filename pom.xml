@@ -15,7 +15,6 @@
         <module>web</module>
         <module>domain</module>
         <module>test</module>
-        <module>app</module>
     </modules>
 
     <properties>

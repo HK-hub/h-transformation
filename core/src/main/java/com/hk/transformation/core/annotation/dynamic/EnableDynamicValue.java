@@ -2,7 +2,6 @@ package com.hk.transformation.core.annotation.dynamic;
 
 import com.hk.transformation.core.config.TransformationAutoConfiguration;
 import org.springframework.context.annotation.Import;
-
 import java.lang.annotation.*;
 
 /**
