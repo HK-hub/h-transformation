@@ -86,6 +86,9 @@ public class DynamicValueHelper {
                         // 非空，进行赋值
                         // TODO 修改为JSON赋值，转换方式
                         value = ReflectUtil.valueToAdaptiveString(initValue);
+                    } else {
+                        // 此处需要特殊注意处理后续的 null 空指针异常
+                        value = null;
                     }
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();

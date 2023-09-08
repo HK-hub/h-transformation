@@ -338,6 +338,6 @@ public class ReflectUtil {
     public static String valueToAdaptiveString(Object value) {
 
 
-        return "";
+        return String.valueOf(value);
     }
 }
