@@ -1,5 +1,6 @@
 package com.hk.transformation.core.helper;
 
+import ch.qos.logback.core.pattern.ConverterUtil;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.hk.transformation.core.annotation.dynamic.DynamicSwitch;
@@ -10,6 +11,7 @@ import com.hk.transformation.core.reflect.converter.StringConverter;
 import com.hk.transformation.core.reflect.util.ReflectUtil;
 import com.hk.transformation.core.value.DynamicValueBean;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.*;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -217,8 +219,10 @@ public class DynamicValueHelper {
 
         // 能够直接赋值
         if (BooleanUtils.isTrue(assignable)) {
-            log.info("convert value:{} to target value:{}, by direct", value, value);
-            return value;
+            // 转换为目标类型
+            Object adaptiveValue = ConvertUtils.convert(value, fieldType);
+            log.info("convert source value:class={},value={} to target value:class={},value={}, by direct", value.getClass(), value, adaptiveValue.getClass(), adaptiveValue);
+            return adaptiveValue;
         }
 
         // 不能赋值

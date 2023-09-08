@@ -40,7 +40,7 @@ public class DynamicDataDomain {
     /**
      * 动态值的Class类型
      */
-    private Class<?> valueClass = this.value.getClass();
+    private Class<?> valueClass;
 
 
     /**

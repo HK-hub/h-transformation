@@ -124,7 +124,7 @@ public class TransformableValue implements Transformable{
 
         // 获取注解属性值
         Object defaultValue = this.dynamicValueBean.getDefaultValue();
-        Class<?> valueClass = this.dynamicValueBean.getValueClass();
+        Class<?> valueClass = this.valueClass;
 
         if (this.member instanceof Field field) {
 
@@ -169,13 +169,6 @@ public class TransformableValue implements Transformable{
             return;
         }
 
-        // 判断是否可以赋值的类型
-        boolean enableAssign = ReflectUtil.isAssignable(field, field.getType(), defaultValue, valueClass);
-        if (BooleanUtils.isFalse(enableAssign)) {
-            // 不能进行赋值
-            return;
-        }
-
         try{
             // 可以赋值并不代表能够赋值成功，还需要转换为需要的类型的值
             Object adaptiveValue = DynamicValueHelper.computeAdaptiveDynamicValue(bean, field, defaultValue, valueClass);
@@ -195,6 +188,7 @@ public class TransformableValue implements Transformable{
             // 初始化异常
             log.warn("try to assign:{} value to field:{} of Object:{}, but failed on:{}", defaultValue, field.getName(), bean.getClass(), e.getMessage());
         }
+
     }
 
 

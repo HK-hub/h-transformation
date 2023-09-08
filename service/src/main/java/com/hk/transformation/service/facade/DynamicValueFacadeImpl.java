@@ -135,15 +135,18 @@ public class DynamicValueFacadeImpl implements DynamicValueFacade {
 
     /**
      * 转换为Domain数据对象
-     * @param value
+     * @param transformableValue
      * @return
      */
-    private DynamicDataDomain convertToDynamicDataDomain(TransformableValue value) {
+    private DynamicDataDomain convertToDynamicDataDomain(TransformableValue transformableValue) {
         DynamicDataDomain domain = new DynamicDataDomain();
-        DynamicValueBean bean = value.getDynamicValueBean();
-        domain.setKey(value.getKey()).setValue(value.getValue())
+        DynamicValueBean bean = transformableValue.getDynamicValueBean();
+
+        // 获取值以及值的类型
+        Object value = transformableValue.getValue();
+        domain.setKey(transformableValue.getKey()).setValue(value)
                 .setDefaultValue(bean.getDefaultValue())
-                .setValueClass(value.getValue().getClass())
+                .setValueClass(transformableValue.getValueClass())
                 .setExpression(bean.getExpression()).setElType(bean.getElType());
 
         return domain;
