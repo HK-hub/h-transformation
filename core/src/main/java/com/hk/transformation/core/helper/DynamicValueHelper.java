@@ -1,28 +1,19 @@
 package com.hk.transformation.core.helper;
 
-import ch.qos.logback.core.pattern.ConverterUtil;
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.hk.transformation.core.annotation.dynamic.DynamicSwitch;
 import com.hk.transformation.core.annotation.dynamic.DynamicValue;
 import com.hk.transformation.core.constants.TransformationConstants;
-import com.hk.transformation.core.reflect.converter.CollectionConverter;
-import com.hk.transformation.core.reflect.converter.StringConverter;
 import com.hk.transformation.core.reflect.util.ReflectUtil;
 import com.hk.transformation.core.value.DynamicValueBean;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.*;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.util.ReflectionUtils;
 
-import javax.annotation.Resource;
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.util.*;
 
 /**

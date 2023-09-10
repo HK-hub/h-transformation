@@ -1,7 +1,6 @@
 package com.hk.transformation.core.value;
 
 import com.hk.transformation.core.helper.DynamicValueHelper;
-import com.hk.transformation.core.reflect.util.ReflectUtil;
 import lombok.Data;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -95,7 +94,7 @@ public class TransformableValue implements Transformable{
         this.dynamicValueBean = dynamicValueBean;
         this.key = dynamicValueBean.getKey();
         this.value = dynamicValueBean.getDefaultValue();
-        this.valueClass = dynamicValueBean.getValueClass();
+        this.valueClass = field.getClass();
         this.genericType = field.getGenericType();
         this.bean = bean;
         this.member = field;
@@ -124,12 +123,11 @@ public class TransformableValue implements Transformable{
 
         // 获取注解属性值
         Object defaultValue = this.dynamicValueBean.getDefaultValue();
-        Class<?> valueClass = this.valueClass;
 
         if (this.member instanceof Field field) {
 
             // 字段初始化: 赋初值，计算表达式
-            this.initialize(field, defaultValue, valueClass);
+            this.initialize(field, defaultValue, defaultValue.getClass());
         } else if (this.member instanceof Method) {
 
             // 方法初始化

@@ -5,6 +5,7 @@ import com.hk.transformation.core.annotation.dynamic.IgnoreValue;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.PriorityOrdered;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
@@ -164,8 +165,14 @@ public abstract class AbstractTransformationProcessor implements BeanPostProcess
      * @return
      */
     private List<Field> findAllField(Class<?> clazz) {
+
         final List<Field> res = new LinkedList<>();
-        ReflectionUtils.doWithFields(clazz, res::add);
+        // 忽略字段
+        ReflectionUtils.FieldFilter fieldFilter = field -> {
+            IgnoreValue annotation = field.getAnnotation(IgnoreValue.class);
+            return annotation == null;
+        };
+        ReflectionUtils.doWithFields(clazz, res::add, fieldFilter);
         return res;
     }
 
