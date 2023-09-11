@@ -56,4 +56,11 @@ public @interface DynamicSwitch {
      */
     String elType() default "";
 
+
+    /**
+     * 备注
+     * @return
+     */
+    String comment() default "";
+
 }

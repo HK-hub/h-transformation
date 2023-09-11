@@ -35,6 +35,8 @@ public @interface DynamicValue {
 
     /**
      * 默认值,初始值
+     * 数组和集合可以采用2中模式：item1,item2,item3,item4 或者 [item1,item2,item3,item4]
+     * 分别是采用的 Spring Converter 和 Gson 进行的转换
      * TODO 暂时全部采用JSON 数据进行赋值，转换，调整等
      */
     String defaultValue() default "";
@@ -56,5 +58,12 @@ public @interface DynamicValue {
      * 动态表达式类型
      */
     String elType() default "";
+
+
+    /**
+     * 备注
+     * @return
+     */
+    String comment() default "";
 
 }

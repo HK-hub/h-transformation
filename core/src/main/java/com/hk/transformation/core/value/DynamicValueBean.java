@@ -55,4 +55,9 @@ public class DynamicValueBean {
      */
     private String elType;
 
+    /**
+     * 备注
+     */
+    private String comment;
+
 }

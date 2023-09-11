@@ -1,5 +1,6 @@
 package com.hk.transformation.core.helper;
 
+
 import com.google.gson.Gson;
 import com.hk.transformation.core.annotation.dynamic.DynamicSwitch;
 import com.hk.transformation.core.annotation.dynamic.DynamicValue;
@@ -13,6 +14,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 
+import javax.swing.*;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -101,7 +103,9 @@ public class DynamicValueHelper {
             }
 
             // 构造DynamicValueBean 对象
-            dynamicValueBean.setKey(key).setValue(value).setDefaultValue(value).setValueClass(valueClass);
+            dynamicValueBean.setKey(key)
+                    .setValue(value).setDefaultValue(value).setValueClass(valueClass)
+                    .setComment(dynamicValue.comment());
             return dynamicValueBean;
         }
 
@@ -150,8 +154,9 @@ public class DynamicValueHelper {
 
             // 构造DynamicValueBean 对象
             String initValue = Boolean.valueOf(value).toString();
-            dynamicValueBean.setKey(key).setValue(initValue)
-                    .setDefaultValue(initValue)
+            dynamicValueBean.setKey(key)
+                    .setComment(dynamicSwitch.comment())
+                    .setValue(initValue).setDefaultValue(initValue)
                     .setValueClass(valueClass);
 
             return dynamicValueBean;
@@ -187,7 +192,7 @@ public class DynamicValueHelper {
 
             // TODO 考虑String 类型更改为Object类型
             // TODO 以后考虑字段上的@Value注解内部的 spEl 表达式
-            dynamicValueBean.setKey(key);
+            dynamicValueBean.setKey(key).setComment(dynamicValue.comment());
             return dynamicValueBean;
         }
 
@@ -222,6 +227,24 @@ public class DynamicValueHelper {
         // 不能赋值
         log.warn("field:{}-class:{} can not assigned by value:{}-{}, use direct", field, field.getClass(), value, valueClass);
 
+        // 直接转换方式失败，采用Gson 进行JSON转换
+        Object tmpValue = value;
+        if (!ReflectUtil.isStringType(value.getClass())) {
+            // 如果不是字符串，需要转换为json 字符串
+            tmpValue = gson.toJson(value);
+        }
+
+        // 尝试进行转换
+        try {
+            Object adaptiveObject = gson.fromJson((String) tmpValue, fieldType);
+            log.info("convert value:{} to target value:{}, by json", value, adaptiveObject);
+            return adaptiveObject;
+        } catch (Exception e) {
+            // 抛出异常
+            log.warn("field:{}-class:{} can not convert by value:{}-class{}, use json", field, field.getClass(), value, valueClass);
+        }
+
+        // JSON 方式转化你失败，尝试Spring Converter方式转换
         try {
             // 进行转换
             Object adaptiveObject = conversionService.convert(value, fieldType);
@@ -231,22 +254,6 @@ public class DynamicValueHelper {
         } catch (Exception e) {
             // 转换失败会抛出异常
             log.warn("field:{}-class:{} can not convert by value:{}-class{}, use spring convert", field, field.getClass(), value, valueClass);
-        }
-
-        // Spring Converter方式转换失败，采用Gson 进行JSON转换
-        if (!ReflectUtil.isStringType(value.getClass())) {
-            // 如果不是字符串，需要转换为json 字符串
-            value = gson.toJson(value);
-        }
-
-        // 尝试进行转换
-        try {
-            Object adaptiveObject = gson.fromJson((String) value, fieldType);
-            log.info("convert value:{} to target value:{}, by json", value, adaptiveObject);
-            return adaptiveObject;
-        } catch (Exception e) {
-            // 抛出异常
-            log.warn("field:{}-class:{} can not convert by value:{}-class{}, use json", field, field.getClass(), value, valueClass);
         }
 
         // 战时没有匹配的类型

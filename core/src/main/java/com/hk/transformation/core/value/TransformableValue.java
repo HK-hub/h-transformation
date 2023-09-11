@@ -6,10 +6,14 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.util.ClassUtils;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -94,7 +98,7 @@ public class TransformableValue implements Transformable{
         this.dynamicValueBean = dynamicValueBean;
         this.key = dynamicValueBean.getKey();
         this.value = dynamicValueBean.getDefaultValue();
-        this.valueClass = field.getClass();
+        this.valueClass = field.getType();
         this.genericType = field.getGenericType();
         this.bean = bean;
         this.member = field;
@@ -123,11 +127,14 @@ public class TransformableValue implements Transformable{
 
         // 获取注解属性值
         Object defaultValue = this.dynamicValueBean.getDefaultValue();
-
+        Class<?> valueClass = null;
         if (this.member instanceof Field field) {
 
             // 字段初始化: 赋初值，计算表达式
-            this.initialize(field, defaultValue, defaultValue.getClass());
+            if (Objects.nonNull(defaultValue)) {
+                valueClass = defaultValue.getClass();
+            }
+            this.initialize(field, defaultValue, valueClass);
         } else if (this.member instanceof Method) {
 
             // 方法初始化
