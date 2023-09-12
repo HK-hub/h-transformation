@@ -3,6 +3,7 @@ package com.hk.transformation.core.config;
 import com.hk.transformation.core.annotation.dynamic.EnableDynamicValue;
 import com.hk.transformation.core.context.ObservationContext;
 import com.hk.transformation.core.context.TransformContext;
+import com.hk.transformation.core.convert.StringToCollectionConverter;
 import com.hk.transformation.core.processor.DynamicValueObserverProcessor;
 import com.hk.transformation.core.processor.DynamicValueProcessor;
 import com.hk.transformation.core.registry.TransformValueRegistry;
@@ -11,6 +12,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 
 /**
  * @author : HK意境
@@ -85,4 +88,16 @@ public class TransformationAutoConfiguration {
         return new DynamicValueObserverProcessor(observationContext);
     }
 
+
+    /**
+     * 自定义转换服务
+     * @return
+     */
+    @Bean
+    public ConversionService conversionService() {
+        DefaultConversionService service = new DefaultConversionService();
+        service.addConverter(new StringToCollectionConverter(service));
+        // 添加其他自定义转换器，如果有的话
+        return service;
+    }
 }
