@@ -44,6 +44,12 @@ public class DynamicDataDomain {
 
 
     /**
+     * 动态值Class类名
+     */
+    private String valueClassName;
+
+
+    /**
      * 动态表达式：简单的规则引擎，spEL，OGNL等
      */
     private String expression;

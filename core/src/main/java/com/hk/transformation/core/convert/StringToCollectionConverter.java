@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * @author : HK意境
- * @ClassName : StringToListConverter
+ * @ClassName : StringToCollectionConverter
  * @date : 2023/9/11 18:44
  * @description :
  * @Todo :
@@ -14,7 +14,7 @@ import java.util.List;
  * @Modified :
  * @Version : 1.0
  */
-public class StringToListConverter<T> implements Converter<String, List<T>> {
+public class StringToCollectionConverter<T> implements Converter<String, List<T>> {
 
     @Override
     public List<T> convert(String source) {

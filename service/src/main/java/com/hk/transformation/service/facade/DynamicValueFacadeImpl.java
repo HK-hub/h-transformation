@@ -147,6 +147,7 @@ public class DynamicValueFacadeImpl implements DynamicValueFacade {
         domain.setKey(transformableValue.getKey()).setValue(value)
                 .setDefaultValue(bean.getDefaultValue())
                 .setValueClass(transformableValue.getValueClass())
+                .setValueClassName(transformableValue.getValueClass().getName())
                 .setExpression(bean.getExpression()).setElType(bean.getElType());
 
         return domain;
