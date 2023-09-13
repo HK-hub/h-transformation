@@ -16,6 +16,8 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import java.lang.reflect.Field;
 import java.util.*;
 
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
+
 /**
  * @author : HK意境
  * @ClassName : DynamicValueHelper
@@ -245,6 +247,8 @@ public class DynamicValueHelper {
         // JSON 方式转化你失败，尝试Spring Converter方式转换
         try {
             // 进行转换
+            // 兼容集合和数组类型的处理
+            value = compatibleArrayAndListString(value, fieldType);
             Object adaptiveObject = conversionService.convert(value, fieldType);
             log.info("convert value:{} to target value:{}, by spring converter", value, adaptiveObject);
             // 返回转换后的对象
@@ -256,6 +260,44 @@ public class DynamicValueHelper {
 
         // 战时没有匹配的类型
         throw new ClassCastException("value:" + value + ", class is " + valueClass + ", can not convert to field class:" + fieldType);
+    }
+
+
+    /**
+     * 兼容数组和集合类型的字段类型
+     * @param value
+     * @param fieldType
+     * @return
+     */
+    private static Object compatibleArrayAndListString(Object value, Class<?> fieldType) {
+
+        // 是否集合或数组
+        //判断返回类型是否是集合类型
+        boolean isCollection = Collection.class.isAssignableFrom(fieldType);
+        //判断返回类型是否是数组类型
+        boolean isArray = fieldType.isArray();
+
+        if(isArray || isCollection) {
+            // 是数组或者集合类型
+            String string = (String) value;
+            if (string == null) {
+                return EMPTY_STRING_ARRAY;
+            }
+            // 匹配正则表达式，去除[], {}, 这种符号开头结尾
+            if (string.startsWith("[") && string.endsWith("]")) {
+                // 去除首尾的[]
+                string = string.substring(1);
+                string = string.substring(0, string.length() - 1);
+            } else if (string.startsWith("{") && string.endsWith("}")) {
+                // 去除首尾的{}
+                string = string.substring(1);
+                string = string.substring(0, string.length() - 1);
+            }
+            return string;
+        }
+
+        // 不是数组或集合类型
+        return value;
     }
 
 

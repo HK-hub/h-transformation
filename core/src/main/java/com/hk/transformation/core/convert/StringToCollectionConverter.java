@@ -1,5 +1,6 @@
 package com.hk.transformation.core.convert;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -21,6 +22,7 @@ import java.util.Set;
  * @Modified :
  * @Version : 1.0
  */
+@Slf4j
 public class StringToCollectionConverter implements ConditionalGenericConverter {
 
     private static final String[] EMPTY_STRING_ARRAY = {};
@@ -51,6 +53,9 @@ public class StringToCollectionConverter implements ConditionalGenericConverter 
     @Override
     @Nullable
     public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+
+        log.info("using custom converter: convert {} from {} to {}", source, sourceType, targetType);
+
         if (source == null) {
             return null;
         }
