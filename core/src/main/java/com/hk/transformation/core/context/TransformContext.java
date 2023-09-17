@@ -11,10 +11,7 @@ import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.BeanFactory;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author : HK意境
@@ -35,6 +32,23 @@ public class TransformContext extends AbstractTransformableEnvironment {
      */
     private static final TransformContext INSTANCE = new TransformContext();
 
+
+    /**
+     * 获取全部动态值列表
+     * @return
+     */
+    @Override
+    public List<TransformableValue> get() {
+
+        Collection<Multimap<String, TransformableValue>> values = this.registry.values();
+
+        // 添加到集合中
+        List<TransformableValue> result = new LinkedList<>();
+        for (Multimap<String, TransformableValue> multimap : values) {
+            result.addAll(multimap.values());
+        }
+        return result;
+    }
 
     /**
      * 获取值指定key和beanFactory 下动态值对象列表

@@ -19,6 +19,13 @@ public interface TransformableEnvironment{
 
 
     /**
+     * 获取全部动态值列表
+     * @return
+     */
+    public List<TransformableValue> get();
+
+
+    /**
      * 获取指定beanFactory 和 key下动态值列表
      * @param beanFactory
      * @param key
