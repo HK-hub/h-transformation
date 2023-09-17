@@ -67,21 +67,24 @@ public class AutoUpdateValueChangeListener implements ValueChangeListener, Appli
         List<TransformableValue> transformableValues = this.transformValueRegistry.get(beanFactory, key);
 
         // 更新值，获取旧值，用作观察者的通知
-        ArrayList<@Nullable Object> oldValueList = Lists.newArrayList();
+        List<Object> adaptiveValueList = Lists.newArrayList();
+        List<Object> oldValueList = Lists.newArrayList();
+
         for (TransformableValue transformableValue : transformableValues) {
             try {
-                // 更新之后返回旧值
-                Object oldValue = transformableValue.update(newValue);
+                // 更新之后返回适配的新值
+                oldValueList.add(transformableValue.getValue());
+                Object adaptive = transformableValue.update(newValue);
                 // 添加到待通知变更的旧数据列表
-                oldValueList.add(oldValue);
+                adaptiveValueList.add(adaptive);
             } catch (Exception e) {
                 log.warn("Error updating transformValue:{} with key:{}, value:{} failed", transformableValue, key, newValue);
             }
         }
         // 观察者模式通知观察者值变更
         // TODO 后续使用线程池，采用异步的方式来进行通知
-        for (Object oldValue : oldValueList) {
-            observationContext.notify(key, oldValue, newValue);
+        for (int i = 0; i < oldValueList.size(); i++) {
+            observationContext.notify(key, oldValueList.get(i), adaptiveValueList.get(i));
         }
 
         // 返回更新之后的新值

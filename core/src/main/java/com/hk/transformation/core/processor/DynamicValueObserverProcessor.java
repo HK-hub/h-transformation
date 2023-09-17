@@ -3,15 +3,13 @@ package com.hk.transformation.core.processor;
 
 import com.hk.transformation.core.annotation.observation.DynamicObserver;
 import com.hk.transformation.core.context.ObservationContext;
-import com.hk.transformation.core.listen.observation.observer.ValueObserver;
+import com.hk.transformation.core.listen.observation.observer.TransformableObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Objects;
 
 /**
@@ -58,8 +56,8 @@ public class DynamicValueObserverProcessor implements BeanPostProcessor {
             return bean;
         }
 
-        // 需要确定Bean对象是否实现了 ValueObserver 接口
-        if (bean instanceof ValueObserver observerBean) {
+        // 需要确定Bean对象是否实现了 TransformableObserver 接口
+        if (bean instanceof TransformableObserver observerBean) {
             String[] keys = annotation.key();
 
             // 注解不为空，注册到观察者列表中

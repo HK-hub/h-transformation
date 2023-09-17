@@ -200,13 +200,13 @@ public class TransformableValue implements Transformable{
     /**
      * 更新值
      * @param newValue 新值
-     * @return 返回旧值
+     * @return 返回更新之后的新值
      */
     @Override
     public Object update(Object newValue) {
 
         // 获取旧值
-        Object oldValue = this.value;
+        Object adaptiveValue = newValue;
 
         if (this.member instanceof Field field) {
             // 获取原来的访问权限
@@ -214,7 +214,7 @@ public class TransformableValue implements Transformable{
             // 设置值
             try {
                 // 计算出适配的值
-                Object adaptiveValue = DynamicValueHelper.computeAdaptiveDynamicValue(this.bean, (Field) this.member, newValue, newValue.getClass());
+                adaptiveValue = DynamicValueHelper.computeAdaptiveDynamicValue(this.bean, (Field) this.member, newValue, newValue.getClass());
                 // 访问权限压制
                 field.setAccessible(true);
                 field.set(this.bean, adaptiveValue);
@@ -225,7 +225,7 @@ public class TransformableValue implements Transformable{
             }
         }
 
-        return oldValue;
+        return adaptiveValue;
     }
 
 }

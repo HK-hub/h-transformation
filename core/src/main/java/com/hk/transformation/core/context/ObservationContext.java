@@ -2,8 +2,7 @@ package com.hk.transformation.core.context;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
-import com.hk.transformation.core.listen.observation.observer.ValueObserver;
-import com.hk.transformation.core.value.TransformableValue;
+import com.hk.transformation.core.listen.observation.observer.TransformableObserver;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -27,7 +26,7 @@ public class ObservationContext implements Observable{
      * 观察者列表
      */
     @Getter
-    private final Multimap<String, ValueObserver> observerMap = LinkedListMultimap.create();
+    private final Multimap<String, TransformableObserver<?>> observerMap = LinkedListMultimap.create();
 
     /**
      * Context实例
@@ -45,9 +44,9 @@ public class ObservationContext implements Observable{
     @Override
     public boolean notify(String key, Object oldValue, Object newValue) {
 
-        Collection<ValueObserver> valueObservers = observerMap.get(key);
+        Collection<TransformableObserver<?>> valueObservers = observerMap.get(key);
             if (CollectionUtils.isNotEmpty(valueObservers)) {
-                for (ValueObserver observer : valueObservers) {
+                for (TransformableObserver observer : valueObservers) {
                     try{
                         observer.update(oldValue, newValue);
                     }catch(Exception e){
@@ -59,7 +58,7 @@ public class ObservationContext implements Observable{
     }
 
     @Override
-    public void add(String key, ValueObserver observer) {
+    public void add(String key, TransformableObserver<?> observer) {
 
        observerMap.put(key, observer);
     }
@@ -71,7 +70,7 @@ public class ObservationContext implements Observable{
      * @return 返回被移除的观察者列表
      */
     @Override
-    public Collection<ValueObserver> remove(String key) {
+    public Collection<TransformableObserver<?>> remove(String key) {
         return observerMap.removeAll(key);
     }
 
@@ -83,7 +82,7 @@ public class ObservationContext implements Observable{
      * @return
      */
     @Override
-    public boolean remove(String key, ValueObserver observer) {
+    public boolean remove(String key, TransformableObserver observer) {
         return observerMap.remove(key, observer);
     }
 

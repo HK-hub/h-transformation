@@ -1,9 +1,7 @@
 package com.hk.transformation.core.context;
 
-import com.hk.transformation.core.listen.observation.observer.ValueObserver;
-import com.hk.transformation.core.value.TransformableValue;
+import com.hk.transformation.core.listen.observation.observer.TransformableObserver;
 
-import java.lang.reflect.Field;
 import java.util.Collection;
 
 /**
@@ -34,14 +32,15 @@ public interface Observable {
      * @param key
      * @param observer
      */
-    public void add(String key, ValueObserver observer);
+    public void add(String key, TransformableObserver<?> observer);
 
 
     /**
      * 移除key 下全部 观察者
      * @param key
+     * @return
      */
-    public Collection<ValueObserver> remove(String key);
+    public Collection<TransformableObserver<?>> remove(String key);
 
 
     /**
@@ -49,7 +48,7 @@ public interface Observable {
      * @param key
      * @param observer
      */
-    public boolean remove(String key, ValueObserver observer);
+    public boolean remove(String key, TransformableObserver observer);
 
 
 }
