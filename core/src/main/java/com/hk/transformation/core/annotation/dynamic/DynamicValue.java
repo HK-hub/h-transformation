@@ -56,6 +56,7 @@ public @interface DynamicValue {
 
     /**
      * 动态表达式类型
+     *
      */
     String elType() default "";
 

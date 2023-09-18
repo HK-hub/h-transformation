@@ -48,7 +48,7 @@ public class ObservationContext implements Observable{
             if (CollectionUtils.isNotEmpty(valueObservers)) {
                 for (TransformableObserver observer : valueObservers) {
                     try{
-                        observer.update(oldValue, newValue);
+                        observer.update(key, oldValue, newValue);
                     }catch(Exception e){
                         log.warn("notify key={}, transformable observer update failed:", key, e);
                     }

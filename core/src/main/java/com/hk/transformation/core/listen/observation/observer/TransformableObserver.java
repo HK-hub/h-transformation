@@ -18,6 +18,6 @@ public interface TransformableObserver<T extends Object> {
      * @param oldValue
      * @param newValue
      */
-    public void update(T oldValue, T newValue);
+    public void update(String key, T oldValue, T newValue);
 
 }
