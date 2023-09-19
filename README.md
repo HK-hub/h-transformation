@@ -407,7 +407,6 @@ public @interface DynamicValue {
     @AliasFor("value")
     String key() default "";
 
-
     /**
      * 默认值,初始值
      * 数组和集合可以采用2中模式：item1,item2,item3,item4 或者 [item1,item2,item3,item4]
@@ -415,25 +414,21 @@ public @interface DynamicValue {
      */
     String defaultValue() default "";
 
-
     /**
      * 动态值的Class类型
      */
     Class<?> valueClass() default void.class;
-
 
     /**
      * 动态表达式：简单的规则引擎，spEL，OGNL等
      */
     String expression() default "";
 
-
     /**
      * 动态表达式类型
      *
      */
     String elType() default "";
-
 
     /**
      * 备注
@@ -450,10 +445,47 @@ public @interface DynamicValue {
 valueClass 是指defaultValue的类型Class，当然一般情况下我们不建议你进行设置，因为我们会在运行时为你进行动态的计算，
 当然如果你的Field字段类型是如Object等不确定类型，那么你可以通过valueClass进行指定值类型。
 
-## @DynamicSwitch
+后续还会进行兼容@Value注解，能够支持解析表达式，能够使得您能够更加便捷的管理配置和动态值对象
 
+## @DynamicSwitch
+对没错，@DynamicSwitch 注解其实就是一个@DynamicValue 注解的特殊类别, 表示该字段是一个boolean,Boolean类型的属性字段，
+并且默认值是false
+```java
+@Target({ElementType.FIELD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface DynamicSwitch {
+
+    /**
+     * 等同于key: 如果为空默认，如果是属性字段=全类名.属性名，如果是方法=全类名#方法名
+     */
+    @AliasFor("key")
+    String value() default "";
+
+    /**
+     * 动态值的Key, 用于后期获取和修改进行定位
+     */
+    @AliasFor("value")
+    String key() default "";
+    
+    /**
+     * 默认值,初始值
+     */
+    boolean defaultValue() default false;
+    
+    /**
+     * 动态值的Class类型
+     */
+    Class<?> valueClass() default boolean.class;
+    
+    ......
+}
+```
+@DynamicSwitch注解从语义上就十分明显，适用于动态开关，灰度开关此类业务场景的，你可以进行动态启用，关闭新特性；业务灰度测试等。
 
 ## @DynamicObserver
+如果我们想对动态值对象进行监听其值的变化来进行一些业务操作，那么你就需要使用@DynamicObserver 注解来表示你的观察者对象，
+当然你可以选择监听多个Key对应的动态值对象，并且可以指定泛型，来选择你感兴趣值类型。
 
 # 未来特性
 - [ ] 支持@Value注解标识的字段的兼容，能够无缝集成到Spring Boot中
