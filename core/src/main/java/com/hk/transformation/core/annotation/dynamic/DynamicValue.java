@@ -50,6 +50,9 @@ public @interface DynamicValue {
 
     /**
      * 动态表达式：简单的规则引擎，spEL，OGNL等
+     * 注意：如果你设置为表达式的方式来进行初始设置，后续更新的方式需要确保配置环境中存在该配置
+     *      - 当配置文件的值被更新的时候，您的动态值对象也将会被同步更新；
+     *      - 当通过transformation的api(仅仅只有通过更新表达式) 主动更新动态表达式值的时候，相关联的配置文件值也会被同步更新
      */
     String expression() default "";
 

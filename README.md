@@ -503,4 +503,9 @@ public @interface DynamicSwitch {
 
 # 参考文献
 [企业级代码探究: @Value + Apollo动态刷新原理~](https://juejin.cn/post/7246049169306173495)
+
 [Spring 注解（二）注解工具类 AnnotationUtils 和 AnnotatedElementUtils](https://www.cnblogs.com/binarylei/p/10415585.html)
+
+[SpringBoot 中 @Value 源码解析](https://www.jianshu.com/p/933669270a9f)
+
+[6 种方式读取 Springboot 的配置，老鸟都这么玩（原理+实战）](https://www.cnblogs.com/chengxy-nds/p/17484997.html)
