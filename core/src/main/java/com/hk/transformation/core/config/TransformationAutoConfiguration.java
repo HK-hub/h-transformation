@@ -4,6 +4,7 @@ import com.hk.transformation.core.annotation.dynamic.EnableDynamicValue;
 import com.hk.transformation.core.context.ObservationContext;
 import com.hk.transformation.core.context.TransformContext;
 import com.hk.transformation.core.convert.StringToCollectionConverter;
+import com.hk.transformation.core.helper.DynamicValueHelper;
 import com.hk.transformation.core.processor.DynamicValueObserverProcessor;
 import com.hk.transformation.core.processor.DynamicValueProcessor;
 import com.hk.transformation.core.registry.TransformValueRegistry;
@@ -68,13 +69,25 @@ public class TransformationAutoConfiguration {
 
 
     /**
+     * 动态值工具类负责注解bean构建，value值转换，占位符解析
+     * @return
+     */
+    @Bean
+    public DynamicValueHelper dynamicValueHelper() {
+
+        return new DynamicValueHelper();
+    }
+
+
+    /**
      * 动态值注解处理器
      * @return
      */
     @Bean
-    public DynamicValueProcessor dynamicValueProcessor(TransformValueRegistry transformValueRegistry) {
+    public DynamicValueProcessor dynamicValueProcessor(TransformValueRegistry transformValueRegistry,
+                                                       DynamicValueHelper dynamicValueHelper) {
 
-        return new DynamicValueProcessor(transformValueRegistry);
+        return new DynamicValueProcessor(transformValueRegistry, dynamicValueHelper);
     }
 
 

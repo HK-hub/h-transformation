@@ -4,15 +4,22 @@ package com.hk.transformation.core.helper;
 import com.google.gson.Gson;
 import com.hk.transformation.core.annotation.dynamic.DynamicSwitch;
 import com.hk.transformation.core.annotation.dynamic.DynamicValue;
+import com.hk.transformation.core.annotation.dynamic.ExpressionLanguageEnum;
 import com.hk.transformation.core.constants.TransformationConstants;
 import com.hk.transformation.core.reflect.util.ReflectUtil;
+import com.hk.transformation.core.resolver.TransformPlaceholderResolver;
 import com.hk.transformation.core.value.DynamicValueBean;
+import com.hk.transformation.core.value.TransformableValue;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
+
+import javax.annotation.Resource;
+import java.awt.color.ICC_Profile;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -41,6 +48,12 @@ public class DynamicValueHelper {
      */
     private static final Gson gson = new Gson();
 
+    /**
+     * 解析器
+     */
+    @Resource
+    private TransformPlaceholderResolver transformPlaceholderResolver;
+
 
     /**
      * 计算Field字段的@DynamicValue 注解出来
@@ -48,12 +61,23 @@ public class DynamicValueHelper {
      * @param field
      * @return
      */
-    public static DynamicValueBean computeDynamicFieldAnnotation(Object bean, Field field) {
+    public DynamicValueBean computeDynamicFieldAnnotation(Object bean, Field field) {
+
+        // 获取@Value注解
+        Value valueAnnotation = AnnotationUtils.findAnnotation(field, Value.class);
 
         // 判断是否直接标注@DynamicValue 注解，还是@DynamicSwitch 注解，还是通过在Class类上标注的@DynamicValue
-
         DynamicValueBean dynamicValueBean = new DynamicValueBean();
-        // 获取Field字段上的@DynamicValue注解
+
+        // 解析设置@Value占位符
+        if (Objects.nonNull(valueAnnotation)) {
+            String placeholder = valueAnnotation.value();
+            // 设置表达式
+            dynamicValueBean.setExpression(placeholder);
+            dynamicValueBean.setElType(ExpressionLanguageEnum.SpEL.getType());
+        }
+
+        // 1.获取Field字段上的@DynamicValue注解
         DynamicValue dynamicValue = AnnotationUtils.findAnnotation(field, DynamicValue.class);
 
         if (Objects.nonNull(dynamicValue)) {
@@ -109,7 +133,7 @@ public class DynamicValueHelper {
             return dynamicValueBean;
         }
 
-        // @DynamicValue 注解为空，判断是否为添加了@DynamicSwitch 注解
+        // 2.@DynamicValue 注解为空，判断是否为添加了@DynamicSwitch 注解
         DynamicSwitch dynamicSwitch = AnnotationUtils.findAnnotation(field, DynamicSwitch.class);
         if (Objects.nonNull(dynamicSwitch)) {
             // 获取Key: 因为使用了@AliasFor 注解和 key() 属性是相通的
@@ -162,7 +186,7 @@ public class DynamicValueHelper {
             return dynamicValueBean;
         }
 
-        // 如果这些注解都没有，需要判断类上是否添加了@DynamicValue 注解来进行设置
+        // 3.如果这些注解都没有，需要判断类上是否添加了@DynamicValue 注解来进行设置
         dynamicValue = AnnotationUtils.findAnnotation(bean.getClass(), DynamicValue.class);
         if (Objects.nonNull(dynamicValue)) {
             // 此处是添加在类上的动态注解
@@ -197,20 +221,34 @@ public class DynamicValueHelper {
         }
 
         // 能够寻找的地方都进行了查找，还是不能构建出来，返回null, 外面进行判断
+
+        // 如果没有找到@DynamicValue注解，则进行@Value注解的解析
+        if (Objects.nonNull(valueAnnotation)) {
+            String placeholder = valueAnnotation.value();
+            dynamicValueBean.setKey(placeholder)
+                    // 配置值初始都是String
+                    .setValueClass(field.getType())
+                    // 解析value
+                    .setDefaultValue(this.transformPlaceholderResolver.resolvePlaceholder(placeholder))
+                    .setComment("value annotation field:" + placeholder);
+            return dynamicValueBean;
+        }
+
         return null;
     }
 
 
-
     /**
      * 计算出能够赋值的适配的类，如果不能转换为适配的类，将抛出异常
+     *
+     * @param transformableValue
      * @param bean field 所属的Object
      * @param field 字段属性声明类型
      * @param value 值
      * @param valueClass 值类型
      * @return
      */
-    public static Object computeAdaptiveDynamicValue(Object bean, Field field, Object value, Class<?> valueClass) {
+    public static Object computeAdaptiveDynamicValue(TransformableValue transformableValue, Object bean, Field field, Object value, Class<?> valueClass) {
 
         // 判断是否可以直接分配
         Class<?> fieldType = field.getType();

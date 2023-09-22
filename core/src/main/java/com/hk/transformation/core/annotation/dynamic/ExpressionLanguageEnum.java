@@ -1,5 +1,7 @@
 package com.hk.transformation.core.annotation.dynamic;
 
+import lombok.Getter;
+
 /**
  * @author : HK意境
  * @ClassName : ExpressionLanguageEnum
@@ -15,16 +17,23 @@ public enum ExpressionLanguageEnum {
     /**
      * 规则引擎
      */
-    RULE,
+    RULE("rule"),
 
     /**
      * spring EL 表达式
      */
-    spEL,
+    SpEL("SpEL"),
 
     /**
      * ognl 对象图导航语言
      */
-    OGNL,
+    OGNL("ognl"),
 
+    ;
+    @Getter
+    private String type;
+
+    ExpressionLanguageEnum(String type) {
+        this.type = type;
+    }
 }

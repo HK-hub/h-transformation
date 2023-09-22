@@ -59,7 +59,7 @@ public @interface DynamicValue {
 
     /**
      * 动态表达式类型
-     *
+     * {@link ExpressionLanguageEnum}
      */
     String elType() default "";
 

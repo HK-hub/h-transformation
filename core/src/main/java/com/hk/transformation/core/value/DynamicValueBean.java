@@ -1,5 +1,6 @@
 package com.hk.transformation.core.value;
 
+import com.hk.transformation.core.annotation.dynamic.ExpressionLanguageEnum;
 import lombok.Data;
 import lombok.ToString;
 import lombok.experimental.Accessors;
@@ -52,6 +53,7 @@ public class DynamicValueBean {
 
     /**
      * 动态表达式类型
+     * {@link ExpressionLanguageEnum}
      */
     private String elType;
 

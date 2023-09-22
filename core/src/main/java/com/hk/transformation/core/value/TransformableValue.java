@@ -6,14 +6,11 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.util.ClassUtils;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -176,7 +173,7 @@ public class TransformableValue implements Transformable{
 
         try{
             // 可以赋值并不代表能够赋值成功，还需要转换为需要的类型的值
-            Object adaptiveValue = DynamicValueHelper.computeAdaptiveDynamicValue(bean, field, defaultValue, valueClass);
+            Object adaptiveValue = DynamicValueHelper.computeAdaptiveDynamicValue(this, bean, field, defaultValue, valueClass);
 
             // 是否允许访问状态
             boolean canAccess = field.canAccess(this.bean);
@@ -214,7 +211,7 @@ public class TransformableValue implements Transformable{
             // 设置值
             try {
                 // 计算出适配的值
-                adaptiveValue = DynamicValueHelper.computeAdaptiveDynamicValue(this.bean, (Field) this.member, newValue, newValue.getClass());
+                adaptiveValue = DynamicValueHelper.computeAdaptiveDynamicValue(this, this.bean, (Field) this.member, newValue, newValue.getClass());
                 // 访问权限压制
                 field.setAccessible(true);
                 field.set(this.bean, adaptiveValue);

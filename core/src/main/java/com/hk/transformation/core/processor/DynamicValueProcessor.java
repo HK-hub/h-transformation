@@ -41,12 +41,17 @@ public class DynamicValueProcessor extends AbstractTransformationProcessor imple
      */
     private TransformValueRegistry transformValueRegistry;
 
+    /**
+     * 工具助手
+     */
+    private DynamicValueHelper dynamicValueHelper;
+
 
     /**
      * 构造器注入
      * @param transformValueRegistry
      */
-    public DynamicValueProcessor(TransformValueRegistry transformValueRegistry) {
+    public DynamicValueProcessor(TransformValueRegistry transformValueRegistry, DynamicValueHelper dynamicValueHelper) {
         this.transformValueRegistry = transformValueRegistry;
     }
 
@@ -65,6 +70,7 @@ public class DynamicValueProcessor extends AbstractTransformationProcessor imple
 
     /**
      * 处理动态字段
+     * 此时使用@Value注解标注的字段已经被解析赋值了
      * @param bean
      * @param beanName
      * @param field
@@ -73,9 +79,13 @@ public class DynamicValueProcessor extends AbstractTransformationProcessor imple
     protected void processField(Object bean, String beanName, Field field) {
 
         // 将注解计算出来
-        DynamicValueBean dynamicValue = DynamicValueHelper.computeDynamicFieldAnnotation(bean, field);
+        DynamicValueBean dynamicValue = this.dynamicValueHelper.computeDynamicFieldAnnotation(bean, field);
 
-        // 能够计算出来注解对象
+        // 不能够计算出来注解对象
+        if (Objects.isNull(dynamicValue)) {
+            // 检查是否使用@Value注解
+        }
+
         if (Objects.nonNull(dynamicValue)) {
             // 注册到Context中
             this.doRegister(bean, beanName, field, dynamicValue);
@@ -124,6 +134,11 @@ public class DynamicValueProcessor extends AbstractTransformationProcessor imple
 
     }
 
+
+    /**
+     * 设置为最低的优先级在其余后置处理器之后执行
+     * @return
+     */
     @Override
     public int getOrder() {
         return Ordered.LOWEST_PRECEDENCE;
