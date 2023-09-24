@@ -33,6 +33,12 @@ public class TransformPlaceholderResolver {
         return stringValueResolver.resolveStringValue(valueWithPlaceholder);
     }
 
+
+    /**
+     * 根据key 获取配置文件
+     * @param key
+     * @return
+     */
     public String getConfigValue(String key) {
         return env.getProperty(key);
     }

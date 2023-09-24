@@ -10,6 +10,7 @@
 - [x] 简单易扩展的动态值变更监听，订阅机制
 - [x] 支持几乎所有数据类型之间的动态值转换，赋值等操作
 - [x] 支持表达式语言，规则引擎等动态解析模式
+- [x] 兼容支持@Value注解
 - [x] Spring Boot应用隔离，全局应用开关
 
 # 起源
@@ -380,6 +381,35 @@ public class AnonymousTypeTestBean {
     private List<Long> longList;
 
 }
+```
+
+## 兼容@Value
+```java
+@Component
+public class PropertyConfigTestBean {
+    
+    /**
+     * 单独使用
+     */
+    @Value("${server.port}")
+    private int serverPort;
+
+    
+    @Value("${spring.application.name:transformation-test-application}")
+    private String applicationName;
+
+
+    /**
+     * 混合使用
+     * ！！！我们不建议您进行混合使用，因为这可能会造成您的初始值混乱的情况
+     * 注意此处的优先级，如果您指定了动态值对象的初始值，那么将使用@DynamicValue 注解的defaultValue指定值
+     */
+    @Value("${server.servlet.context-path:/context}")
+    @DynamicValue(key = "servletContextPath", defaultValue = "/transform")
+    private String servletContextPath;
+    
+}
+
 ```
 
 # 核心注解
