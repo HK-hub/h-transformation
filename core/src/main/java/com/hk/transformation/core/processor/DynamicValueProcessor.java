@@ -53,6 +53,7 @@ public class DynamicValueProcessor extends AbstractTransformationProcessor imple
      */
     public DynamicValueProcessor(TransformValueRegistry transformValueRegistry, DynamicValueHelper dynamicValueHelper) {
         this.transformValueRegistry = transformValueRegistry;
+        this.dynamicValueHelper = dynamicValueHelper;
     }
 
     /**
