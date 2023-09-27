@@ -1,9 +1,9 @@
 package com.hk.transformation.core.resolver;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringValueResolver;
+import javax.annotation.Resource;
 
 /**
  * @ClassName : TransformPlaceholderResolver
@@ -16,21 +16,19 @@ import org.springframework.util.StringValueResolver;
  * @Version : 1.0
  */
 @Component
-public class TransformPlaceholderResolver {
+public class TransformPlaceholderResolver implements EnvironmentAware {
 
-    @Autowired
-    private Environment env;
+    private Environment environment;
 
-    @Autowired
-    private StringValueResolver stringValueResolver;
 
     /**
      * 将形如 ${xxx} 的占位符解析出来并且获取其对应的配置值
-     * @param valueWithPlaceholder
+     * @param placeholder
      * @return
      */
-    public String resolvePlaceholder(String valueWithPlaceholder) {
-        return stringValueResolver.resolveStringValue(valueWithPlaceholder);
+    public String resolvePlaceholder(String placeholder) {
+
+        return this.environment.resolveRequiredPlaceholders(placeholder);
     }
 
 
@@ -40,6 +38,11 @@ public class TransformPlaceholderResolver {
      * @return
      */
     public String getConfigValue(String key) {
-        return env.getProperty(key);
+        return this.environment.getProperty(key);
+    }
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
     }
 }

@@ -2,15 +2,15 @@ package com.hk.transformation.core.helper;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.PropertySource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author : HK意境
@@ -24,7 +24,7 @@ import java.util.Set;
  */
 @Slf4j
 @Getter
-public class TransformPropertyPlaceholderHelper {
+public class TransformPropertyPlaceholderHelper implements EnvironmentAware {
 
     private static final Map<String, String> wellKnownSimplePrefixes = new HashMap<>(4);
 
@@ -64,6 +64,9 @@ public class TransformPropertyPlaceholderHelper {
      */
     private final PropertyPlaceholderHelper.PlaceholderResolver placeholderResolver;
 
+    private Environment environment;
+
+    private PropertySource propertySource;
 
     public TransformPropertyPlaceholderHelper(PropertyPlaceholderHelper.PlaceholderResolver resolver) {
 
@@ -84,6 +87,44 @@ public class TransformPropertyPlaceholderHelper {
     }
 
 
+
+
+    /**
+     * 将格式为{@code ${name}}的所有占位符替换为提供的属性配置中的值，
+     * @param value 包含要替换占位符的值
+     * @param properties 要替换占位符的{@code Properties}对象
+     * @return 替换占位符后的值
+     */
+    public String replacePlaceholders(String value, final Properties properties) {
+        Assert.notNull(properties, "'properties' must not be null");
+        return replacePlaceholders(value, properties::getProperty);
+    }
+
+
+    /**
+     * 将格式为{@code ${name}}的所有占位符替换为提供的属性配置中的值，
+     * @param value 包含要替换占位符的值
+     * @param placeholderResolver 要替换占位符的{@code Properties}对象
+     * @return 替换占位符后的值
+     */
+    public String replacePlaceholders(String value, PropertyPlaceholderHelper.PlaceholderResolver placeholderResolver) {
+        Assert.notNull(value, "'value' must not be null");
+        return parseStringValue(value, placeholderResolver, null);
+    }
+
+
+
+    /**
+     * 解析占位符为配置值
+     * @param value
+     * @return
+     */
+    public String parseStringValue(String value) {
+
+       return parseStringValue(value,null);
+    }
+
+
     /**
      * 解析占位符为配置值
      * @param value
@@ -91,6 +132,17 @@ public class TransformPropertyPlaceholderHelper {
      * @return
      */
     public String parseStringValue(String value, @Nullable Set<String> visitedPlaceholders) {
+
+        return parseStringValue(value, this.placeholderResolver, visitedPlaceholders);
+    }
+
+
+    /**
+     * 将格式为{@code ${name}}的所有占位符替换为提供的属性配置中的值，
+     * @param value 包含要替换占位符的值
+     * @return 替换占位符后的值
+     */
+    public String parseStringValue(String value, PropertyPlaceholderHelper.PlaceholderResolver placeholderResolver, @Nullable Set<String> visitedPlaceholders) {
 
         // 获取前缀地址
         int startIndex = value.indexOf(this.placeholderPrefix);
@@ -154,6 +206,7 @@ public class TransformPropertyPlaceholderHelper {
     }
 
 
+
     /**
      * 获取占位符介绍索引下标
      * @param buf
@@ -197,5 +250,19 @@ public class TransformPropertyPlaceholderHelper {
     }
 
 
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
 
+    /**
+     * 解析占位符
+     * @param placeholder
+     * @return
+     */
+    public String resolvePlaceholder(String placeholder) {
+        String result = this.environment.resolveRequiredPlaceholders(placeholder);
+        log.debug("resolved placeholder:{}, result:{}", placeholder, result);
+        return result;
+    }
 }

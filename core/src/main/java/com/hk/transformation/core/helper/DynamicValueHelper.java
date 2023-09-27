@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
-import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -49,8 +48,15 @@ public class DynamicValueHelper {
     /**
      * 解析器
      */
-    @Resource
     private TransformPlaceholderResolver transformPlaceholderResolver;
+
+    public DynamicValueHelper() {
+
+    }
+
+    public DynamicValueHelper(TransformPlaceholderResolver transformPlaceholderResolver) {
+        this.transformPlaceholderResolver = transformPlaceholderResolver;
+    }
 
 
     /**
@@ -150,7 +156,7 @@ public class DynamicValueHelper {
                 try {
                     // 获取field字段声明的时候的初始值
                     field.setAccessible(true);
-                    boolean initValue = field.getBoolean(bean);
+                    Boolean initValue = (Boolean) field.get(bean);
                     if (Objects.nonNull(initValue)) {
                         // 非空，进行赋值
                         value = initValue;
@@ -226,7 +232,7 @@ public class DynamicValueHelper {
             dynamicValueBean.setKey(placeholder)
                     // 配置值初始都是String
                     .setValueClass(field.getType())
-                    // 解析value
+                    // 解析value: 其实这里此处@Value注解已经被Spring Boot解析了，Field字段的值就是解析之后的值
                     .setDefaultValue(this.transformPlaceholderResolver.resolvePlaceholder(placeholder))
                     .setComment("value annotation field:" + placeholder);
             return dynamicValueBean;

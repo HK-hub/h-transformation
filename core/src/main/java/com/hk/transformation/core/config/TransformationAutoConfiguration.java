@@ -8,6 +8,7 @@ import com.hk.transformation.core.helper.DynamicValueHelper;
 import com.hk.transformation.core.processor.DynamicValueObserverProcessor;
 import com.hk.transformation.core.processor.DynamicValueProcessor;
 import com.hk.transformation.core.registry.TransformValueRegistry;
+import com.hk.transformation.core.resolver.TransformPlaceholderResolver;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -73,9 +74,9 @@ public class TransformationAutoConfiguration {
      * @return
      */
     @Bean
-    public DynamicValueHelper dynamicValueHelper() {
+    public DynamicValueHelper dynamicValueHelper(TransformPlaceholderResolver transformPlaceholderResolver) {
 
-        return new DynamicValueHelper();
+        return new DynamicValueHelper(transformPlaceholderResolver);
     }
 
 
