@@ -86,7 +86,8 @@ public class TransformValueRegistry {
                 value.init();
             } else if (member instanceof Method) {
                 // 方法类型
-                log.warn("dynamic method is not support..., please wait...");
+                // log.warn("dynamic method is not support..., please wait...");
+                value.init();
             }
         } catch (Exception e) {
             e.printStackTrace();

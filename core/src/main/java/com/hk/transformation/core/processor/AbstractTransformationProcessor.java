@@ -2,6 +2,7 @@ package com.hk.transformation.core.processor;
 
 import com.hk.transformation.core.annotation.dynamic.DynamicValue;
 import com.hk.transformation.core.annotation.dynamic.IgnoreValue;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.PriorityOrdered;
@@ -183,7 +184,30 @@ public abstract class AbstractTransformationProcessor implements BeanPostProcess
      */
     private List<Method> findAllMethod(Class<?> clazz) {
         final List<Method> res = new LinkedList<>();
-        ReflectionUtils.doWithMethods(clazz, res::add);
+
+        // 静态方法，抽象，非public方法过滤
+        ReflectionUtils.MethodFilter methodFilter = method -> {
+            int modifiers = method.getModifiers();
+
+            // 是否非public方法
+            if (BooleanUtils.isFalse(Modifier.isPublic(modifiers))) {
+                // 不添加
+                return false;
+            }
+
+            // 是否非静态方法
+            if (BooleanUtils.isTrue(Modifier.isStatic(modifiers))) {
+                return false;
+            }
+
+            // 是否非抽象方法
+            if (BooleanUtils.isTrue(Modifier.isAbstract(modifiers))) {
+                return false;
+            }
+
+            return true;
+        };
+        ReflectionUtils.doWithMethods(clazz, res::add, methodFilter);
         return res;
     }
 

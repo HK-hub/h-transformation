@@ -40,6 +40,15 @@ public interface DynamicValueFacade {
      */
     public List<DynamicDataDomain> updateTransformableValue(String key, Object data);
 
+    /**
+     * 采用表达式更新指定key下的值
+     * @param key
+     * @param expression
+     * @param type
+     * @return
+     */
+    public List<DynamicDataDomain> updateWithExpression(String key, String expression, String type);
+
 
     /**
      * 重置动态值对象的值为默认值

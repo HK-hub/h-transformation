@@ -42,7 +42,7 @@ public class  DynamicValueHelperTest {
 
         Field field = testValue.getClass().getDeclaredField("intValue");
         Object value = "100";
-        Object adaptiveValue = DynamicValueHelper.computeAdaptiveDynamicValue(null, testValue, field, value, value.getClass());
+        Object adaptiveValue = DynamicValueHelper.computeAdaptiveDynamicValue(null, testValue, field.getType(), value, value.getClass());
         boolean canAccess = field.canAccess(testValue);
         field.setAccessible(true);
         field.set(testValue, adaptiveValue);

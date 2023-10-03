@@ -17,6 +17,7 @@ import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Objects;
 
 /**
@@ -65,7 +66,20 @@ public class DynamicValueProcessor extends AbstractTransformationProcessor imple
     @Override
     protected void processMethod(Object bean, String beanName, Method method) {
 
-        // log.info("暂不支持方法更新，敬请期待...");
+        log.info("start to process method:{}#{}, parameters={}", bean.getClass().getName(), method.getName(), method.getParameterTypes());
+
+        // 获取参数列表
+        Parameter[] parameters = method.getParameters();
+        for (Parameter parameter : parameters) {
+            // 将注解计算出来
+            DynamicValueBean dynamicValueBean = this.dynamicValueHelper.computeDynamicMethodAnnotation(bean, method, parameter, beanName);
+
+            // 进行注册动态参数
+            if (Objects.nonNull(dynamicValueBean)) {
+                this.doRegister(bean, beanName, method, parameter, dynamicValueBean);
+            }
+        }
+
     }
 
 
@@ -82,14 +96,10 @@ public class DynamicValueProcessor extends AbstractTransformationProcessor imple
         // 将注解计算出来
         DynamicValueBean dynamicValue = this.dynamicValueHelper.computeDynamicFieldAnnotation(bean, field);
 
-        // 不能够计算出来注解对象
-        if (Objects.isNull(dynamicValue)) {
-            // 检查是否使用@Value注解
-        }
-
+        // 能够计算出来注解对象
         if (Objects.nonNull(dynamicValue)) {
             // 注册到Context中
-            this.doRegister(bean, beanName, field, dynamicValue);
+            this.doRegister(bean, beanName, field, null, dynamicValue);
         }
     }
 
@@ -102,7 +112,7 @@ public class DynamicValueProcessor extends AbstractTransformationProcessor imple
      * @param member field 成员属性或 method 成员方法
      * @param dynamicValue
      */
-    private void doRegister(Object bean, String beanName, Member member, DynamicValueBean dynamicValue) {
+    private void doRegister(Object bean, String beanName, Member member, Parameter parameter, DynamicValueBean dynamicValue) {
 
         // 包装为TransformableValue 对象
         TransformableValue value = null;
@@ -111,7 +121,7 @@ public class DynamicValueProcessor extends AbstractTransformationProcessor imple
             value = new TransformableValue(dynamicValue, bean, field, false);
         } else if (member instanceof Method method) {
             // 方法
-            value = new TransformableValue(dynamicValue, bean, method, false);
+            value = new TransformableValue(dynamicValue, bean, method, parameter, false);
         } else {
             // 暂不支持的类型：构造函数等
             log.debug("H-Transformation @DynamicValue annotation currently only support to be used on fields or methods," +

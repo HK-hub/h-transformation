@@ -15,7 +15,7 @@ import java.lang.annotation.*;
  * @Modified :
  * @Version : 1.0
  */
-@Target({ElementType.FIELD, ElementType.TYPE})
+@Target({ElementType.FIELD, ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface DynamicValue {

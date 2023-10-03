@@ -92,6 +92,21 @@ public class DynamicValueFacadeImpl implements DynamicValueFacade {
 
 
     /**
+     * 使用表达式更新指定key的动态值对象
+     * @param key
+     * @param expression
+     * @param type
+     * @return
+     */
+    @Override
+    public List<DynamicDataDomain> updateWithExpression(String key, String expression, String type) {
+
+
+        return null;
+    }
+
+
+    /**
      * 重置动态值对象为初始值
      * @param key
      * @return

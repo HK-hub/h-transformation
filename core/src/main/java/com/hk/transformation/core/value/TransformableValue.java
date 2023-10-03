@@ -6,10 +6,9 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.BeanFactory;
-import java.lang.reflect.Field;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import org.springframework.core.MethodParameter;
+
+import java.lang.reflect.*;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -78,6 +77,10 @@ public class TransformableValue implements Transformable{
      */
     protected Member member;
 
+    /**
+     * 动态代理方法
+     */
+    protected Parameter parameter;
 
     /**
      * 字段或方法的类: Field类或 Method 类
@@ -102,12 +105,13 @@ public class TransformableValue implements Transformable{
         this.initialized.set(initialized);
     }
 
-    public TransformableValue(DynamicValueBean dynamicValueBean, Object bean, Method method, boolean initialized) {
+    public TransformableValue(DynamicValueBean dynamicValueBean, Object bean, Method method, Parameter parameter, boolean initialized) {
         this.dynamicValueBean = dynamicValueBean;
         this.key = dynamicValueBean.getKey();
         this.value = dynamicValueBean.getDefaultValue();
         this.bean = bean;
         this.member = method;
+        this.parameter = parameter;
         this.initialized.set(initialized);
     }
 
@@ -132,10 +136,15 @@ public class TransformableValue implements Transformable{
                 valueClass = defaultValue.getClass();
             }
             this.initialize(field, defaultValue, valueClass);
-        } else if (this.member instanceof Method) {
+        } else if (this.member instanceof Method method) {
 
             // 方法初始化
-            log.warn("method currently not supported...");
+            // log.warn("method currently not supported...");
+            // 字段初始化: 赋初值，计算表达式
+            if (Objects.nonNull(defaultValue)) {
+                valueClass = defaultValue.getClass();
+            }
+            this.initialize(method, defaultValue, valueClass);
         }
 
         return defaultValue;
@@ -159,7 +168,7 @@ public class TransformableValue implements Transformable{
 
 
     /**
-     * 初始化
+     * 初始化字段
      * @param field
      * @param defaultValue
      * @param valueClass
@@ -173,7 +182,7 @@ public class TransformableValue implements Transformable{
 
         try{
             // 可以赋值并不代表能够赋值成功，还需要转换为需要的类型的值
-            Object adaptiveValue = DynamicValueHelper.computeAdaptiveDynamicValue(this, bean, field, defaultValue, valueClass);
+            Object adaptiveValue = DynamicValueHelper.computeAdaptiveDynamicValue(this, bean, field.getType(), defaultValue, valueClass);
 
             // 是否允许访问状态
             boolean canAccess = field.canAccess(this.bean);
@@ -195,6 +204,31 @@ public class TransformableValue implements Transformable{
 
 
     /**
+     * 初始化方法参数
+     * @param method
+     * @param defaultValue
+     * @param valueClass
+     */
+    private void initialize(Method method, Object defaultValue, Class<?> valueClass) {
+
+        // 是否已经初始化了
+        if (BooleanUtils.isTrue(this.initialized.get())) {
+            return;
+        }
+
+        try{
+            // 可以赋值并不代表能够赋值成功，还需要转换为需要的类型的值
+            Object adaptiveValue = DynamicValueHelper.computeAdaptiveDynamicValue(this, bean, this.parameter.getType(), defaultValue, valueClass);
+            log.debug("assign value to method parameter:{}${}", method.getName(), parameter.getName());
+            this.value = adaptiveValue;
+        }catch(Exception e){
+            // 初始化异常
+            log.warn("try to assign:{} value to method:{} of Object:{}, but failed on:{}", defaultValue, member.getName(), bean.getClass(), e.getMessage());
+        }
+
+    }
+
+    /**
      * 更新值
      * @param newValue 新值
      * @return 返回更新之后的新值
@@ -211,7 +245,7 @@ public class TransformableValue implements Transformable{
             // 设置值
             try {
                 // 计算出适配的值
-                adaptiveValue = DynamicValueHelper.computeAdaptiveDynamicValue(this, this.bean, (Field) this.member, newValue, newValue.getClass());
+                adaptiveValue = DynamicValueHelper.computeAdaptiveDynamicValue(this, this.bean, field.getType(), newValue, newValue.getClass());
                 // 访问权限压制
                 field.setAccessible(true);
                 field.set(this.bean, adaptiveValue);
@@ -220,6 +254,17 @@ public class TransformableValue implements Transformable{
             } catch (Exception e) {
                 log.warn("update dynamic value use by:{}, failed:", newValue, e);
             }
+
+        } else if (this.member instanceof Method method) {
+            // 动态方法参数
+            // 计算出适配的值
+            try {
+                adaptiveValue = DynamicValueHelper.computeAdaptiveDynamicValue(this, this.bean, this.parameter.getType(), newValue, newValue.getClass());
+                this.value = adaptiveValue;
+            } catch (Exception e) {
+                log.warn("update dynamic parameter use by:{}, failed:", newValue, e);
+            }
+
         }
 
         return adaptiveValue;

@@ -1,6 +1,5 @@
 package com.hk.transformation.core.helper;
 
-
 import com.google.gson.Gson;
 import com.hk.transformation.core.annotation.dynamic.DynamicSwitch;
 import com.hk.transformation.core.annotation.dynamic.DynamicValue;
@@ -18,6 +17,9 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.*;
 
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
@@ -243,31 +245,121 @@ public class DynamicValueHelper {
 
 
     /**
+     * 计算Method方法的@DynamicValue 注解出来
+     * @param bean
+     * @param method
+     * @param parameter
+     * @param beanName
+     * @return
+     */
+    public DynamicValueBean computeDynamicMethodAnnotation(Object bean, Method method, Parameter parameter, String beanName) {
+
+        Class<?> parameterType = parameter.getType();
+        // 获取参数上的注解
+        // 获取@Value注解
+        Value valueAnnotation = AnnotationUtils.findAnnotation(parameter, Value.class);
+
+        // 判断是否直接标注@DynamicValue 注解，还是@DynamicSwitch 注解，还是通过在Class类上标注的@DynamicValue
+        DynamicValueBean dynamicValueBean = new DynamicValueBean();
+
+        // 解析设置@Value占位符
+        if (Objects.nonNull(valueAnnotation)) {
+            String placeholder = valueAnnotation.value();
+            // 设置表达式
+            dynamicValueBean.setExpression(placeholder);
+            dynamicValueBean.setElType(ExpressionLanguageEnum.SpEL.getType());
+        }
+
+        // 1.获取Field字段上的@DynamicValue注解
+        DynamicValue dynamicValue = AnnotationUtils.findAnnotation(parameter, DynamicValue.class);
+
+        if (Objects.nonNull(dynamicValue)) {
+            // 获取Key: 因为使用了@AliasFor 注解和 key() 属性是相通的
+            String key = dynamicValue.key();
+            if (StringUtils.isBlank(key)) {
+                // key 是默认值或者空的, 采用字段的全限定名称
+                // 参数key=class#method$参数类型:参数名称
+                key = buildDynamicMethodKey(bean, beanName, method, parameter);
+            }
+
+            // 获取默认值: 如果注解没有配置默认值，那么设置
+            String value = dynamicValue.defaultValue();
+            if (Objects.isNull(value) || value.length() == 0) {
+                // 如果是默认值"", 则需要进行判断
+                value = null;
+            }
+
+            // 获取值类型的Class
+            Class<?> valueClass = dynamicValue.valueClass();
+            if (Objects.isNull(valueClass) || ReflectUtil.isVoidType(valueClass)) {
+                // 如果没有指定类型或者类型为void -> 获取Field字段类型进行赋值
+                valueClass = parameterType;
+            }
+
+            // 获取规则表达式
+            String expression = dynamicValue.expression();
+            if (StringUtils.isNotBlank(expression)) {
+                String elType = dynamicValue.elType();
+                dynamicValueBean.setExpression(expression).setElType(elType);
+                // 解析配置值
+                if (Objects.isNull(value)) {
+                    String resolveValue = this.transformPlaceholderResolver.resolvePlaceholder(expression);
+                    dynamicValueBean.setDefaultValue(resolveValue);
+                }
+            }
+
+            // 构造DynamicValueBean 对象
+            dynamicValueBean.setKey(key)
+                    .setValue(value).setDefaultValue(value).setValueClass(valueClass)
+                    .setComment(dynamicValue.comment());
+            return dynamicValueBean;
+        }
+
+        // 如果没有找到@DynamicValue注解，则进行@Value注解的解析
+        if (Objects.nonNull(valueAnnotation)) {
+            String placeholder = valueAnnotation.value();
+
+            // 解析EL表达式
+            String resolveValue = this.transformPlaceholderResolver.resolvePlaceholder(placeholder);
+            dynamicValueBean.setKey(placeholder)
+                    // 配置值初始都是String
+                    .setValueClass(parameterType)
+                    // 解析value: 其实这里此处@Value注解已经被Spring Boot解析了，Field字段的值就是解析之后的值
+                    .setDefaultValue(resolveValue)
+                    .setComment("value annotation parameter:" + placeholder);
+            return dynamicValueBean;
+        }
+
+        return null;
+    }
+
+
+    /**
      * 计算出能够赋值的适配的类，如果不能转换为适配的类，将抛出异常
      *
      * @param transformableValue
      * @param bean field 所属的Object
-     * @param field 字段属性声明类型
+     * @param type 字段属性声明类型 或 方法参数类型
      * @param value 值
      * @param valueClass 值类型
      * @return
      */
-    public static Object computeAdaptiveDynamicValue(TransformableValue transformableValue, Object bean, Field field, Object value, Class<?> valueClass) {
+    public static Object computeAdaptiveDynamicValue(TransformableValue transformableValue, Object bean, Class<?> type, Object value, Class<?> valueClass) {
 
+        Member member = transformableValue.getMember();
         // 判断是否可以直接分配
-        Class<?> fieldType = field.getType();
-        boolean assignable = ClassUtils.isAssignable(valueClass, fieldType);
+        boolean assignable = ClassUtils.isAssignable(valueClass, type);
 
         // 能够直接赋值
         if (BooleanUtils.isTrue(assignable)) {
             // 转换为目标类型
-            Object adaptiveValue = ConvertUtils.convert(value, fieldType);
+            Object adaptiveValue = ConvertUtils.convert(value, type);
             log.info("convert source value:class={},value={} to target value:class={},value={}, by direct", value.getClass(), value, adaptiveValue.getClass(), adaptiveValue);
             return adaptiveValue;
         }
 
         // 不能赋值
-        log.warn("field:{}-class:{} can not assigned by value:{}-{}, use direct", field, field.getClass(), value, valueClass);
+        log.warn("field:{}-class:{} can not assigned by value:{}-{}, use direct", member, type.getName(), value, valueClass);
 
         // 直接转换方式失败，采用Gson 进行JSON转换
         Object tmpValue = value;
@@ -278,30 +370,30 @@ public class DynamicValueHelper {
 
         // 尝试进行转换
         try {
-            Object adaptiveObject = gson.fromJson((String) tmpValue, fieldType);
+            Object adaptiveObject = gson.fromJson((String) tmpValue, type);
             log.info("convert value:{} to target value:{}, by json", value, adaptiveObject);
             return adaptiveObject;
         } catch (Exception e) {
             // 抛出异常
-            log.warn("field:{}-class:{} can not convert by value:{}-class{}, use json", field, field.getClass(), value, valueClass);
+            log.warn("field:{}-class:{} can not convert by value:{}-class{}, use json", member, type.getName(), value, valueClass);
         }
 
         // JSON 方式转化你失败，尝试Spring Converter方式转换
         try {
             // 进行转换
             // 兼容集合和数组类型的处理
-            value = compatibleArrayAndListString(value, fieldType);
-            Object adaptiveObject = conversionService.convert(value, fieldType);
+            value = compatibleArrayAndListString(value, type);
+            Object adaptiveObject = conversionService.convert(value, type);
             log.info("convert value:{} to target value:{}, by spring converter", value, adaptiveObject);
             // 返回转换后的对象
             return adaptiveObject;
         } catch (Exception e) {
             // 转换失败会抛出异常
-            log.warn("field:{}-class:{} can not convert by value:{}-class{}, use spring convert", field, field.getClass(), value, valueClass);
+            log.warn("field:{}-class:{} can not convert by value:{}-class{}, use spring convert", member, type.getName(), value, valueClass);
         }
 
         // 战时没有匹配的类型
-        throw new ClassCastException("value:" + value + ", class is " + valueClass + ", can not convert to field class:" + fieldType);
+        throw new ClassCastException("value:" + value + ", class is " + valueClass + ", can not convert to field class:" + type);
     }
 
 
@@ -343,4 +435,23 @@ public class DynamicValueHelper {
     }
 
 
+    /**
+     * 构建动态方法参数key
+     * @param bean
+     * @param beanName
+     * @param method
+     * @param parameter
+     * @return
+     */
+    public static String buildDynamicMethodKey(Object bean, String beanName, Method method, Parameter parameter) {
+
+        StringJoiner joiner = new StringJoiner("");
+        try{
+            Class<?> parameterType = parameter.getType();
+            return joiner.add(bean.getClass().getName()).add("#").add(method.getName()).add("$")
+                    .add(parameterType.getName()).add(":").add(parameter.getName()).toString();
+        }catch(Exception e){
+            return null;
+        }
+    }
 }
